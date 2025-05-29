@@ -1,0 +1,183 @@
+-- ============================
+-- CƠ SỞ DỮ LIỆU PROJECT MANAGER
+-- ============================
+
+-- [1] Bảng người dùng
+CREATE TABLE nguoi_dung (
+    ma_nd SERIAL PRIMARY KEY,                          -- Mã người dùng tự tăng
+    ho_ten TEXT NOT NULL,                              -- Họ tên đầy đủ
+    email TEXT UNIQUE NOT NULL,                        -- Email đăng nhập (duy nhất)
+    mat_khau TEXT,                                     -- Mật khẩu đã mã hoá
+    dang_nhap_bang TEXT DEFAULT 'local',               -- Phương thức đăng nhập (local, google...)
+    anh_dai_dien TEXT,                                 -- Đường dẫn ảnh đại diện
+    da_xac_thuc_email BOOLEAN DEFAULT FALSE,           -- Đã xác thực email chưa
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP       -- Ngày tạo tài khoản
+);
+
+-- [2] Bảng nhóm (workspace cấp 1)
+CREATE TABLE nhom (
+    ma_nhom SERIAL PRIMARY KEY,                        -- Mã nhóm
+    ten_nhom TEXT NOT NULL,                            -- Tên nhóm
+    mo_ta TEXT,                                        -- Mô tả nhóm
+    tao_boi INTEGER,                                   -- Mã người tạo nhóm
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP       -- Ngày tạo nhóm
+);
+
+-- [3] Thành viên nhóm
+CREATE TABLE thanh_vien_nhom (
+    ma_tv SERIAL PRIMARY KEY,                          -- Mã thành viên nhóm
+    ma_nhom INTEGER,                                   -- Thuộc nhóm nào
+    ma_nd INTEGER,                                     -- Là người dùng nào
+    vai_tro TEXT DEFAULT 'thanh_vien',                 -- Vai trò trong nhóm (quản trị, thành viên...)
+    ngay_tham_gia TIMESTAMP DEFAULT CURRENT_TIMESTAMP, -- Thời điểm tham gia nhóm
+    UNIQUE(ma_nhom, ma_nd)                             -- Một người chỉ là thành viên 1 lần
+);
+
+-- [4] Thư mục (board cấp 2)
+CREATE TABLE thu_muc (
+    ma_thu_muc SERIAL PRIMARY KEY,                     -- Mã thư mục (board)
+    ten_thu_muc TEXT NOT NULL,                         -- Tên thư mục
+    mo_ta TEXT,                                        -- Mô tả thư mục
+    ma_nhom INTEGER REFERENCES nhom(ma_nhom) ON DELETE CASCADE, -- Thuộc nhóm nào
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP       -- Ngày tạo thư mục
+);
+
+-- [5] Công việc
+CREATE TABLE cong_viec (
+    ma_cv SERIAL PRIMARY KEY,                          -- Mã công việc
+    tieu_de TEXT NOT NULL,                             -- Tên công việc
+    mo_ta TEXT,                                        -- Mô tả
+    trang_thai TEXT DEFAULT 'cho_xu_ly',               -- Trạng thái (đang xử lý, hoàn thành,...)
+    do_uu_tien TEXT DEFAULT 'trung_binh',              -- Độ ưu tiên
+    han_hoan_thanh DATE,                               -- Hạn hoàn thành
+    ma_nhom INTEGER,                                   -- Thuộc nhóm nào
+    tao_boi INTEGER,                                   -- Ai tạo công việc
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,      -- Ngày tạo công việc
+    ma_thu_muc INTEGER REFERENCES thu_muc(ma_thu_muc) ON DELETE CASCADE -- Thuộc thư mục nào
+);
+
+-- [6] Người được giao
+CREATE TABLE nguoi_duoc_giao (
+    ma_giao SERIAL PRIMARY KEY,                        -- Mã giao việc
+    ma_cv INTEGER,                                     -- Công việc nào
+    ma_nd INTEGER,                                     -- Giao cho ai
+    ngay_giao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,     -- Thời điểm giao
+    UNIQUE(ma_cv, ma_nd)                               -- Một người chỉ được giao 1 lần / task
+);
+
+-- [7] Checklist của công việc
+CREATE TABLE cong_viec_checklist (
+    ma_item SERIAL PRIMARY KEY,                        -- Mã item
+    ma_cv INTEGER,                                     -- Thuộc công việc nào
+    noi_dung TEXT NOT NULL,                            -- Nội dung checklist
+    da_hoan_thanh BOOLEAN DEFAULT FALSE                -- Đã hoàn thành chưa
+);
+
+-- [8] Bình luận trong công việc
+CREATE TABLE cong_viec_binh_luan (
+    ma_bl SERIAL PRIMARY KEY,                          -- Mã bình luận
+    ma_cv INTEGER,                                     -- Thuộc công việc nào
+    ma_nd INTEGER,                                     -- Người bình luận
+    noi_dung TEXT NOT NULL,                            -- Nội dung
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP       -- Thời gian tạo
+);
+
+-- [9] File đính kèm
+CREATE TABLE cong_viec_teps (
+    ma_tep SERIAL PRIMARY KEY,                         -- Mã tệp
+    ma_cv INTEGER,                                     -- Thuộc công việc nào
+    duong_dan TEXT NOT NULL,                           -- Đường dẫn file
+    tai_len_boi INTEGER,                               -- Ai tải lên
+    ngay_tai_len TIMESTAMP DEFAULT CURRENT_TIMESTAMP   -- Thời gian upload
+);
+
+-- [10] Thông báo
+CREATE TABLE thong_bao (
+    ma_tb SERIAL PRIMARY KEY,                          -- Mã thông báo
+    ma_nd INTEGER,                                     -- Gửi cho ai
+    noi_dung TEXT NOT NULL,                            -- Nội dung
+    da_doc BOOLEAN DEFAULT FALSE,                      -- Đã đọc chưa
+    ngay_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP       -- Thời điểm tạo
+);
+
+-- [11] Cài đặt cá nhân
+CREATE TABLE cai_dat_nguoi_dung (
+    ma_nd INTEGER PRIMARY KEY,                         -- Mã người dùng
+    che_do_toi BOOLEAN DEFAULT FALSE,                  -- Giao diện tối
+    ngon_ngu TEXT DEFAULT 'vi'                         -- Ngôn ngữ mặc định
+);
+
+-- [12] Thống kê cá nhân
+CREATE TABLE thong_ke_nguoi_dung (
+    ma_nd INTEGER PRIMARY KEY,                         -- Mã người dùng
+    so_cv_tao INT DEFAULT 0,                           -- Số công việc tạo
+    so_cv_hoan_thanh INT DEFAULT 0,                    -- Đã hoàn thành
+    so_cv_dang_lam INT DEFAULT 0,                      -- Đang làm
+    so_cv_huy_bo INT DEFAULT 0,                        -- Đã huỷ
+    so_cv_tre_han INT DEFAULT 0,                       -- Trễ hạn
+    cap_nhat_lan_cuoi TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Cập nhật cuối
+);
+
+-- [13] Mã OTP xác minh email
+CREATE TABLE ma_xac_thuc_email (
+    email TEXT PRIMARY KEY,                            -- Email người dùng
+    ma_otp TEXT NOT NULL,                              -- Mã OTP
+    thoi_gian_tao TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- Thời gian tạo mã
+);
+
+-- =============================
+-- KHÓA NGOẠI (FOREIGN KEY)
+-- =============================
+
+-- Nhóm → Người dùng
+ALTER TABLE nhom
+ADD CONSTRAINT fk_nhom_nguoidung FOREIGN KEY (tao_boi) REFERENCES nguoi_dung(ma_nd) ON DELETE SET NULL;
+
+-- Thành viên nhóm → Nhóm + Người dùng
+ALTER TABLE thanh_vien_nhom
+ADD CONSTRAINT fk_thanhvien_nhom FOREIGN KEY (ma_nhom) REFERENCES nhom(ma_nhom) ON DELETE CASCADE;
+ALTER TABLE thanh_vien_nhom
+ADD CONSTRAINT fk_thanhvien_nguoidung FOREIGN KEY (ma_nd) REFERENCES nguoi_dung(ma_nd) ON DELETE CASCADE;
+
+-- Công việc → Nhóm + Người dùng
+ALTER TABLE cong_viec
+ADD CONSTRAINT fk_cv_nhom FOREIGN KEY (ma_nhom) REFERENCES nhom(ma_nhom) ON DELETE CASCADE;
+ALTER TABLE cong_viec
+ADD CONSTRAINT fk_cv_nguoidung FOREIGN KEY (tao_boi) REFERENCES nguoi_dung(ma_nd) ON DELETE SET NULL;
+
+-- Người được giao → Công việc + Người dùng
+ALTER TABLE nguoi_duoc_giao
+ADD CONSTRAINT fk_giao_cv FOREIGN KEY (ma_cv) REFERENCES cong_viec(ma_cv) ON DELETE CASCADE;
+ALTER TABLE nguoi_duoc_giao
+ADD CONSTRAINT fk_giao_nd FOREIGN KEY (ma_nd) REFERENCES nguoi_dung(ma_nd) ON DELETE CASCADE;
+
+-- Checklist → Công việc
+ALTER TABLE cong_viec_checklist
+ADD CONSTRAINT fk_checklist_cv FOREIGN KEY (ma_cv) REFERENCES cong_viec(ma_cv) ON DELETE CASCADE;
+
+-- Bình luận → Công việc + Người dùng
+ALTER TABLE cong_viec_binh_luan
+ADD CONSTRAINT fk_binhluan_cv FOREIGN KEY (ma_cv) REFERENCES cong_viec(ma_cv) ON DELETE CASCADE;
+ALTER TABLE cong_viec_binh_luan
+ADD CONSTRAINT fk_binhluan_nd FOREIGN KEY (ma_nd) REFERENCES nguoi_dung(ma_nd) ON DELETE SET NULL;
+
+-- File đính kèm → Công việc + Người dùng
+ALTER TABLE cong_viec_teps
+ADD CONSTRAINT fk_tep_cv FOREIGN KEY (ma_cv) REFERENCES cong_viec(ma_cv) ON DELETE CASCADE;
+ALTER TABLE cong_viec_teps
+ADD CONSTRAINT fk_tep_nd FOREIGN KEY (tai_len_boi) REFERENCES nguoi_dung(ma_nd) ON DELETE SET NULL;
+
+-- Thông báo → Người dùng
+ALTER TABLE thong_bao
+ADD CONSTRAINT fk_tb_nd FOREIGN KEY (ma_nd) REFERENCES nguoi_dung(ma_nd) ON DELETE CASCADE;
+
+-- Cài đặt → Người dùng
+ALTER TABLE cai_dat_nguoi_dung
+ADD CONSTRAINT fk_caidat_nd FOREIGN KEY (ma_nd) REFERENCES nguoi_dung(ma_nd) ON DELETE CASCADE;
+
+-- Thống kê → Người dùng
+ALTER TABLE thong_ke_nguoi_dung
+ADD CONSTRAINT fk_thongke_nd FOREIGN KEY (ma_nd) REFERENCES nguoi_dung(ma_nd) ON DELETE CASCADE;
+
+ALTER TABLE nhom ADD COLUMN mau_nen TEXT DEFAULT '#FFF8E1';
+

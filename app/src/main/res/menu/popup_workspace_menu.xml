@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/menu_add_board" android:title="Thêm Board" />
+    <item android:id="@+id/menu_edit" android:title="Sửa Nhóm" />
+    <item android:id="@+id/menu_delete" android:title="Xoá Nhóm" />
+    <item android:id="@+id/menu_invite" android:title="Mời thành viên" />
+</menu>

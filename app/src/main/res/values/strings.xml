@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Project Manager</string>
+    <string name="scroll_content">Danh sách các panel</string>
+
+    <string-array name="reminder_options">
+        <item>Không nhắc</item>
+        <item>5 phút trước</item>
+        <item>15 phút trước</item>
+        <item>1 giờ trước</item>
+        <item>1 ngày trước</item>
+    </string-array>
+
+    <string-array name="visibility_options">
+        <item>Private</item>
+        <item>Public</item>
+    </string-array>
+
+</resources>
