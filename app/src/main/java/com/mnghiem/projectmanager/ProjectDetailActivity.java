@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
@@ -58,7 +59,7 @@ public class ProjectDetailActivity extends AppCompatActivity {
 
         groupId = getIntent().getIntExtra("ma_nhom", -1);
         currentUserId = getSharedPreferences("USER_PREF", MODE_PRIVATE).getInt("userId", -1);
-
+        Log.d("DEBUG_PROJECT_FLOW", "🟢 ProjectDetailActivity nhận: groupId=" + groupId + ", currentUserId=" + currentUserId);
         if (groupId != -1) {
             loadBoardsByGroup(groupId);
             getGroupCreator(groupId);
@@ -144,6 +145,9 @@ public class ProjectDetailActivity extends AppCompatActivity {
             intent.putExtra("board_id", board.getBoardId());
             intent.putExtra("board_title", board.getTitle());
             intent.putExtra("group_id", groupId);
+            intent.putExtra("currentUserId", currentUserId);
+            Log.d("DEBUG_PROJECT_FLOW", "➡️ Mở BoardDetailActivity với boardId=" + board.getBoardId()
+                    + ", groupId=" + groupId + ", userId=" + currentUserId);
             startActivity(intent);
         });
 

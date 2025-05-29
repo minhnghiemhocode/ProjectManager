@@ -331,11 +331,16 @@ public class HomeActivity extends BaseActivity {
 
     private void openBoardDetail(String boardTitle, int maNhom) {
         saveRecentProject(maNhom);
+
+        Log.d("DEBUG_HOME_FLOW", "Mở ProjectDetailActivity với maNhom=" + maNhom + ", currentUserId=" + currentUserId);
+
         Intent intent = new Intent(this, ProjectDetailActivity.class);
         intent.putExtra("boardTitle", boardTitle);
         intent.putExtra("ma_nhom", maNhom);
+        intent.putExtra("currentUserId", currentUserId); // 🔥 THÊM DÒNG NÀY
         startActivity(intent);
     }
+
 
     private void saveRecentProject(int maNhom) {
         SharedPreferences prefs = getSharedPreferences("RECENT_PROJECTS", MODE_PRIVATE);

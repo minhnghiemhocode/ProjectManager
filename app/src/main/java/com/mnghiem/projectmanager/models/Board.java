@@ -23,8 +23,15 @@ public class Board {
     private String backgroundColor;
 
     @SerializedName("is_pinned")
-    private boolean pinned; // ✅ mới thêm
+    private boolean pinned;
 
+    @SerializedName("so_task")
+    private int soTask;
+
+    // === Constructor mặc định ===
+    public Board() {}
+
+    // === Getter ===
     public int getBoardId() {
         return boardId;
     }
@@ -49,23 +56,17 @@ public class Board {
         return backgroundColor != null ? backgroundColor : "#64B5F6";
     }
 
-    public void setBackgroundColor(String color) {
-        this.backgroundColor = color;
-    }
-
-    public boolean isPinned() { // ✅ getter mới
+    public boolean isPinned() {
         return pinned;
     }
 
-    public void setPinned(boolean pinned) { // (tuỳ chọn) setter nếu cần
-        this.pinned = pinned;
-    }
-
-    @SerializedName("so_task")
-    private int soTask;
-
     public int getSoTask() {
         return soTask;
+    }
+
+    // === Setter ===
+    public void setBoardId(int boardId) {
+        this.boardId = boardId;
     }
 
     public void setTitle(String title) {
@@ -80,4 +81,19 @@ public class Board {
         this.groupId = groupId;
     }
 
+    public void setBackgroundColor(String backgroundColor) {
+        this.backgroundColor = backgroundColor;
+    }
+
+    public void setPinned(boolean pinned) {
+        this.pinned = pinned;
+    }
+
+    public void setSoTask(int soTask) {
+        this.soTask = soTask;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
 }

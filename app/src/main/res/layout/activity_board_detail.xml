@@ -8,10 +8,10 @@
     <!-- Thanh trên cùng -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="16dp">
+        android:padding="16dp">
 
         <!-- Nút back -->
         <ImageView
@@ -42,31 +42,35 @@
             android:contentDescription="More options" />
     </LinearLayout>
 
-
     <!-- Nội dung -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_marginTop="56dp"
-        android:layout_marginBottom="72dp"
-        android:contentDescription=" ">
+        android:layout_marginBottom="0dp">
 
         <LinearLayout
-            android:id="@+id/taskListContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="16dp" />
-    </ScrollView>
+            android:padding="16dp">
 
-    <!-- Nút thêm task -->
-    <ImageButton
-        android:id="@+id/btnAddTask"
-        android:layout_width="56dp"
-        android:layout_height="56dp"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:backgroundTint="#FFFFFF"
-        android:src="@drawable/ic_add"
-        android:contentDescription="Add Task" />
+            <!-- Mô tả Board -->
+            <TextView
+                android:id="@+id/tvBoardDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Mô tả của board sẽ hiện ở đây"
+                android:textColor="#666666"
+                android:textSize="14sp"
+                android:layout_marginBottom="12dp" />
+
+            <!-- Danh sách task -->
+            <LinearLayout
+                android:id="@+id/taskListContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+        </LinearLayout>
+    </ScrollView>
 </FrameLayout>

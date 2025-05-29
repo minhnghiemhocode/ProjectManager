@@ -2,12 +2,10 @@ package com.mnghiem.projectmanager;
 
 import android.content.Intent;
 import android.graphics.Color;
-import android.graphics.Typeface;
-import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.view.MenuItem;
+import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -15,6 +13,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.mnghiem.projectmanager.api.APIClient;
 import com.mnghiem.projectmanager.api.MyAPI;
 import com.mnghiem.projectmanager.models.Task;
@@ -28,112 +27,61 @@ import retrofit2.Response;
 public class BoardDetailActivity extends AppCompatActivity {
 
     private LinearLayout taskListContainer;
-    private int boardId;
-    private String boardName;
+    private int boardId, groupId, currentUserId;
+    private String boardName, boardDescription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_board_detail);
 
-        taskListContainer = findViewById(R.id.taskListContainer);
-        TextView tvBoardTitle = findViewById(R.id.tvBoardTitle);
-        ImageView btnBoardMenu = findViewById(R.id.btnBoardMenu);
-        ImageButton btnAddTask = findViewById(R.id.btnAddTask);
-        ImageView btnBack = findViewById(R.id.btnBack);
-
-        // ✅ Sửa key nhận dữ liệu đúng với intent bên ProjectDetailActivity
         boardId = getIntent().getIntExtra("board_id", -1);
+        groupId = getIntent().getIntExtra("group_id", -1);
+        currentUserId = getIntent().getIntExtra("currentUserId", -1);
         boardName = getIntent().getStringExtra("board_title");
+        boardDescription = getIntent().getStringExtra("board_description");
 
-        tvBoardTitle.setText(boardName != null ? boardName : "Board");
+        TextView tvBoardTitle = findViewById(R.id.tvBoardTitle);
+        TextView tvBoardDescription = findViewById(R.id.tvBoardDescription);
+        ImageView btnBack = findViewById(R.id.btnBack);
+        ImageView btnMenu = findViewById(R.id.btnBoardMenu);
+        taskListContainer = findViewById(R.id.taskListContainer);
 
-        // Nút back
+        tvBoardTitle.setText(boardName);
+        tvBoardDescription.setText(boardDescription != null ? boardDescription : "");
+
         btnBack.setOnClickListener(v -> finish());
-
-        btnBoardMenu.setOnClickListener(v -> showPopupMenu(btnBoardMenu));
-
-        btnAddTask.setOnClickListener(v -> {
-            Intent intent = new Intent(this, AddTaskActivity.class);
-            intent.putExtra("boardId", boardId);
-            startActivity(intent);
-        });
+        btnMenu.setOnClickListener(v -> showPopupMenu(btnMenu));
 
         loadTasks();
     }
 
-
     private void showPopupMenu(View anchor) {
         PopupMenu popup = new PopupMenu(this, anchor);
-        popup.getMenu().add("Cập nhật");
+        popup.getMenu().add("Sửa");
         popup.getMenu().add("Xoá");
         popup.getMenu().add("Thêm Task");
 
         popup.setOnMenuItemClickListener(item -> {
-            String title = item.getTitle().toString();
-            if (title.equals("Cập nhật")) {
-                // Hiện popup cập nhật
-            } else if (title.equals("Xoá")) {
-                // Gọi API xoá board
-            } else if (title.equals("Thêm Task")) {
-                Intent intent = new Intent(this, AddTaskActivity.class);
-                intent.putExtra("boardId", boardId);
-                startActivity(intent);
+            switch (item.getTitle().toString()) {
+                case "Sửa":
+                    // TODO: show edit dialog
+                    break;
+                case "Xoá":
+                    // TODO: confirm and delete board
+                    break;
+                case "Thêm Task":
+                    Intent intent = new Intent(this, AddTaskActivity.class);
+                    intent.putExtra("boardId", boardId);
+                    intent.putExtra("groupId", groupId);
+                    intent.putExtra("currentUserId", currentUserId);
+                    startActivity(intent);
+                    break;
             }
             return true;
         });
+
         popup.show();
-    }
-
-    private View buildTaskCard(Task task) {
-        LinearLayout card = new LinearLayout(this);
-        card.setOrientation(LinearLayout.VERTICAL);
-        card.setPadding(32, 32, 32, 32);
-        card.setElevation(10f);
-
-        GradientDrawable gradient = new GradientDrawable(
-                GradientDrawable.Orientation.TOP_BOTTOM,
-                new int[]{Color.parseColor("#E1F5FE"), Color.WHITE}
-        );
-        gradient.setCornerRadius(40f);
-        card.setBackground(gradient);
-
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-        params.setMargins(0, 0, 0, 32);
-        card.setLayoutParams(params);
-
-        TextView title = new TextView(this);
-        title.setText(task.getTitle());
-        title.setTextSize(16);
-        title.setTypeface(null, Typeface.BOLD);
-        card.addView(title);
-
-        TextView status = new TextView(this);
-        status.setText("Trạng thái: " + task.getStatus());
-        status.setTextColor(Color.DKGRAY);
-        status.setPadding(0, 8, 0, 0);
-        card.addView(status);
-
-        TextView priority = new TextView(this);
-        priority.setText("Ưu tiên: " + task.getPriority());
-        priority.setTextColor(Color.DKGRAY);
-        card.addView(priority);
-
-        TextView deadline = new TextView(this);
-        deadline.setText("Hạn: " + task.getDeadline());
-        deadline.setTextColor(Color.DKGRAY);
-        card.addView(deadline);
-
-        // Avatar thu nhỏ (giả sử bạn đã có URL ảnh)
-        ImageView avatar = new ImageView(this);
-        avatar.setLayoutParams(new LinearLayout.LayoutParams(60, 60));
-        avatar.setImageResource(R.drawable.ic_avatar_placeholder); // Có thể dùng Glide để load ảnh URL
-        card.addView(avatar);
-
-        return card;
     }
 
     private void loadTasks() {
@@ -145,16 +93,71 @@ public class BoardDetailActivity extends AppCompatActivity {
             public void onResponse(Call<List<Task>> call, Response<List<Task>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     for (Task task : response.body()) {
-                        taskListContainer.addView(buildTaskCard(task));
+                        View taskView = buildTaskCard(task);
+
+                        // Đặt khoảng cách dưới mỗi task là 40dp
+                        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                                LinearLayout.LayoutParams.MATCH_PARENT,
+                                LinearLayout.LayoutParams.WRAP_CONTENT
+                        );
+                        params.setMargins(0, 0, 0, 40);
+                        taskView.setLayoutParams(params);
+
+                        taskListContainer.addView(taskView);
                     }
+                } else {
+                    Log.e("BoardDetail", "Lỗi khi lấy task: " + response.code());
                 }
             }
 
             @Override
             public void onFailure(Call<List<Task>> call, Throwable t) {
-                t.printStackTrace();
+                Log.e("BoardDetail", "Lỗi kết nối", t);
             }
         });
     }
 
+    private View buildTaskCard(Task task) {
+        View view = LayoutInflater.from(this).inflate(R.layout.item_task_card, null);
+
+        TextView tvTitle = view.findViewById(R.id.tvTaskTitle);
+        TextView tvStatus = view.findViewById(R.id.tvTaskStatus);
+        TextView tvDeadline = view.findViewById(R.id.tvTaskDeadline);
+        View priorityDot = view.findViewById(R.id.priorityDot);
+        ImageView imgAssignee = view.findViewById(R.id.imgAssignee);
+
+        tvTitle.setText(task.getTieu_de());
+        tvStatus.setText(task.getTrang_thai());
+        tvDeadline.setText("Hạn: " + task.getHan_hoan_thanh());
+
+        // Màu dot theo độ ưu tiên
+        switch (task.getDo_uu_tien()) {
+            case "cao":
+                priorityDot.setBackgroundColor(Color.RED);
+                break;
+            case "trung_binh":
+                priorityDot.setBackgroundColor(Color.parseColor("#FFA500"));
+                break;
+            default:
+                priorityDot.setBackgroundColor(Color.YELLOW);
+                break;
+        }
+
+        // Avatar người được giao (nếu có), bo tròn
+        Glide.with(this)
+                .load(task.getAssigneeAvatarUrl())
+                .placeholder(R.drawable.ic_avatar_placeholder)
+                .circleCrop()
+                .into(imgAssignee);
+
+        view.setOnClickListener(v -> {
+            Intent intent = new Intent(this, TaskDetailActivity.class);
+            intent.putExtra("task_id", task.getMa_cv());
+            intent.putExtra("currentUserId", currentUserId);
+            Log.d("BoardDetail", "🟢 Open TaskDetailActivity with taskId = " + task.getMa_cv());
+            startActivity(intent);
+        });
+
+        return view;
+    }
 }

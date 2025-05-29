@@ -1,41 +1,43 @@
 package com.mnghiem.projectmanager;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import java.util.List;
+import androidx.appcompat.app.AppCompatActivity;
 
-public class ProjectActivity extends BaseActivity {
+public class ProjectActivity extends AppCompatActivity {
 
     private LinearLayout workspaceList;
+    private int groupId;
+    private int currentUserId;
+    private String boardTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_project);
-        setupTopAndBottomBar();
+        setContentView(R.layout.activity_project); // vẫn dùng layout cũ
 
         workspaceList = findViewById(R.id.workspaceList);
 
-        // Mock dữ liệu workspace + panel
-        List<String> projects = List.of("Marketing", "UI Redesign", "AI Planning");
+        // Nhận dữ liệu từ intent
+        boardTitle = getIntent().getStringExtra("boardTitle");
+        groupId = getIntent().getIntExtra("ma_nhom", -1);
+        currentUserId = getIntent().getIntExtra("currentUserId", -1); // 🔥 lấy thêm userId
 
-        for (String projectName : projects) {
-            addWorkspace(projectName);
-        }
-    }
+        Log.d("PROJECT_DETAIL", "🟢 Mở project detail: title=" + boardTitle + ", groupId=" + groupId + ", userId=" + currentUserId);
 
-    private void addWorkspace(String projectTitle) {
         // Tiêu đề workspace
         TextView tv = new TextView(this);
-        tv.setText(projectTitle);
+        tv.setText(boardTitle + " (ID: " + groupId + ", User: " + currentUserId + ")");
         tv.setTextSize(18);
         tv.setTextColor(0xFF000000);
         tv.setPadding(0, 24, 0, 12);
         workspaceList.addView(tv);
 
-        // Panel layout chứa 2 panel demo
+        // Demo layout panel (giữ nguyên như bạn làm mẫu)
         LinearLayout panelRow = new LinearLayout(this);
         panelRow.setOrientation(LinearLayout.HORIZONTAL);
         panelRow.setLayoutParams(new LinearLayout.LayoutParams(
@@ -43,9 +45,8 @@ public class ProjectActivity extends BaseActivity {
                 LinearLayout.LayoutParams.WRAP_CONTENT
         ));
 
-        // Thêm 2 panel mẫu
-        panelRow.addView(createPanelCard("Design Login", "6 lists | 30 cards", 0xFFE0F7FA));
-        panelRow.addView(createPanelCard("Team Roles", "4 lists", 0xFFE8F5E9));
+        panelRow.addView(createPanelCard("Thiết kế UI", "6 lists | 30 cards", 0xFFE0F7FA));
+        panelRow.addView(createPanelCard("Phân quyền", "4 lists", 0xFFE8F5E9));
 
         workspaceList.addView(panelRow);
     }
@@ -75,9 +76,14 @@ public class ProjectActivity extends BaseActivity {
         card.addView(tvTitle);
         card.addView(tvDesc);
 
-        // Sự kiện click mở chi tiết (sau này)
+        // Sau này có thể mở chi tiết thư mục (board) trong workspace
         card.setOnClickListener(v -> {
-            // TODO: mở chi tiết project/panel
+            Intent intent = new Intent(ProjectActivity.this, BoardDetailActivity.class);
+            intent.putExtra("board_title", title);
+            intent.putExtra("board_id", -1); // nếu có id cụ thể thì truyền
+            intent.putExtra("group_id", groupId);
+            intent.putExtra("currentUserId", currentUserId);
+            startActivity(intent);
         });
 
         return card;

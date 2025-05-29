@@ -104,25 +104,25 @@ public interface MyAPI {
     @GET("tasks/deadlines")
     Call<List<Task>> getTasksWithDeadlines(@Query("userId") int userId);
 
-    @POST("task")
+    @POST("tasks")
     Call<GeneralResponse> createTask(@Body Task task);
 
-    @PUT("task/{ma_cv}")
+    @PUT("tasks/{ma_cv}")
     Call<GeneralResponse> updateTask(@Path("ma_cv") int id, @Body Task task);
 
-    @DELETE("task/{ma_cv}")
+    @DELETE("tasks/{ma_cv}")
     Call<GeneralResponse> deleteTask(@Path("ma_cv") int id);
 
-    @PUT("task/{ma_cv}/color")
+    @PUT("tasks/{ma_cv}/color")
     Call<GeneralResponse> updateTaskColor(@Path("ma_cv") int id, @Body ColorRequest request);
 
-    @PUT("task/{ma_cv}/status")
+    @PUT("tasks/{ma_cv}/status")
     Call<GeneralResponse> updateTaskStatus(@Path("ma_cv") int id, @Body Task task);
 
-    @PUT("task/{ma_cv}/priority")
+    @PUT("tasks/{ma_cv}/priority")
     Call<GeneralResponse> updateTaskPriority(@Path("ma_cv") int id, @Body Task task);
 
-    @PUT("task/{ma_cv}/deadline")
+    @PUT("tasks/{ma_cv}/deadline")
     Call<GeneralResponse> updateTaskDeadline(@Path("ma_cv") int id, @Body Task task);
 
     @GET("tasks/by-user")
@@ -131,17 +131,21 @@ public interface MyAPI {
     @GET("tasks/by-board")
     Call<List<Task>> getTasksByBoard(@Query("boardId") int boardId);
 
+    @GET("tasks/{ma_cv}")
+    Call<Task> getTaskById(@Path("ma_cv") int ma_cv);
+
+
 
     // CHECKLIST
 
     @GET("checklist/{ma_cv}")
-    Call<List<ChecklistItem>> getChecklistByTask(@Path("ma_cv") int taskId);
+    Call<List<Checklist>> getChecklistByTask(@Path("ma_cv") int taskId);
 
     @POST("checklist")
-    Call<GeneralResponse> addChecklistItem(@Body ChecklistItem item);
+    Call<GeneralResponse> addChecklistItem(@Body Checklist item);
 
     @PUT("checklist/{ma_item}")
-    Call<GeneralResponse> updateChecklistStatus(@Path("ma_item") int id, @Body ChecklistItem item);
+    Call<GeneralResponse> updateChecklistStatus(@Path("ma_item") int id, @Body Checklist item);
 
     @DELETE("checklist/{ma_item}")
     Call<GeneralResponse> deleteChecklistItem(@Path("ma_item") int id);
@@ -166,4 +170,14 @@ public interface MyAPI {
 
     @POST("settings/language")
     Call<GeneralResponse> updateLanguage(@Body Setting setting);
+
+    // ATTACHMENT
+
+    @GET("attachments/{ma_cv}")
+    Call<List<Attachment>> getAttachmentsByTask(@Path("ma_cv") int taskId);
+
+    @PUT("checklist/{ma_item}/content")
+    Call<GeneralResponse> updateChecklistContent(@Path("ma_item") int id, @Body Checklist item);
+
+
 }

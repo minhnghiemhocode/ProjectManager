@@ -2,7 +2,7 @@ package com.mnghiem.projectmanager.models;
 
 import com.google.gson.annotations.SerializedName;
 
-public class ChecklistItem {
+public class Checklist {
 
     @SerializedName("ma_item")
     private int maItem;
@@ -16,7 +16,7 @@ public class ChecklistItem {
     @SerializedName("da_hoan_thanh")
     private boolean daHoanThanh;
 
-    public ChecklistItem(int maCongViec, String noiDung) {
+    public Checklist(int maCongViec, String noiDung) {
         this.maCongViec = maCongViec;
         this.noiDung = noiDung;
         this.daHoanThanh = false;
@@ -26,12 +26,21 @@ public class ChecklistItem {
         return maItem;
     }
 
+    // Nếu trong code cũ đang dùng getMa_item(), ta viết thêm alias:
+    public int getMa_item() {
+        return maItem;
+    }
+
     public int getMaCongViec() {
         return maCongViec;
     }
 
     public String getNoiDung() {
         return noiDung;
+    }
+
+    public void setNoiDung(String noiDung) {
+        this.noiDung = noiDung;
     }
 
     public boolean isDaHoanThanh() {

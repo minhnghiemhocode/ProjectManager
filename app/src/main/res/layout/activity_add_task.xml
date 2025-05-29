@@ -2,10 +2,10 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:background="#FFFFFF">
+    android:background="#FFFFFF"
+    android:fitsSystemWindows="true">
 
-    <!-- Thanh top -->
+    <!-- Top bar -->
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
@@ -27,21 +27,21 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:layout_weight="1"
-            android:text="New Cards"
+            android:text="New Card"
             android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:textSize="18sp" />
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/btnSave"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="SAVE"
-            android:textStyle="bold"
-            android:textColor="#FFFFFF" />
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- Nội dung chính -->
+    <!-- Main content -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -54,36 +54,59 @@
             android:orientation="vertical">
 
             <!-- Card name -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Card name"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:textColor="#333333" />
+
             <EditText
                 android:id="@+id/edtTaskTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Card name"
+                android:hint="Enter task title"
                 android:background="@drawable/bg_input"
                 android:padding="12dp"
-                android:textColor="#000000"
-                android:textColorHint="#999999"
-                android:textSize="16sp" />
+                android:textSize="16sp"
+                android:layout_marginTop="4dp" />
 
             <!-- Description -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Description"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:layout_marginTop="16dp" />
+
             <EditText
                 android:id="@+id/edtDescription"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Description"
+                android:hint="Enter description"
                 android:background="@drawable/bg_input"
                 android:padding="12dp"
-                android:textColor="#000000"
-                android:textColorHint="#999999"
                 android:textSize="16sp"
-                android:layout_marginTop="12dp" />
+                android:layout_marginTop="4dp" />
 
-            <!-- Chọn người -->
+            <!-- Assignee -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Assign to"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:layout_marginTop="16dp" />
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
                 android:orientation="horizontal"
+                android:layout_marginTop="4dp"
                 android:gravity="center_vertical">
 
                 <ImageView
@@ -102,44 +125,91 @@
                     android:contentDescription="Add People" />
             </LinearLayout>
 
-            <!-- Start date - Due date -->
-            <LinearLayout
-                android:layout_width="match_parent"
+            <!-- Due date -->
+            <TextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
+                android:text="Due date"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:layout_marginTop="16dp" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:layout_marginTop="4dp">
 
                 <ImageView
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:src="@drawable/ic_deadlines"
-                    android:contentDescription="Time Icon" />
-
-                <TextView
-                    android:id="@+id/tvStartDate"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="start date"
-                    android:textColor="#333333"
-                    android:textSize="14sp"
-                    android:layout_marginStart="12dp" />
-
-                <View
-                    android:layout_width="0dp"
-                    android:layout_height="1dp"
-                    android:layout_weight="1" />
+                    android:layout_marginEnd="8dp" />
 
                 <TextView
                     android:id="@+id/tvDueDate"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="due date"
+                    android:text="Select date"
                     android:textColor="#333333"
                     android:textSize="14sp"
-                    android:layout_marginEnd="4dp" />
+                    android:paddingVertical="8dp"
+                    android:clickable="true" />
             </LinearLayout>
 
+            <!-- Priority -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Priority"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:textColor="#333333"
+                android:layout_marginTop="16dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Low"
+                    android:textSize="12sp"
+                    android:textColor="#666666" />
+
+                <SeekBar
+                    android:id="@+id/seekPriority"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:max="2"
+                    android:progress="1"
+                    android:thumbTint="#F57C00"
+                    android:progressTint="#F57C00"
+                    android:layout_marginHorizontal="12dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="High"
+                    android:textSize="12sp"
+                    android:textColor="#666666" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/tvPriorityLevel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Medium"
+                android:textColor="#F57C00"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp" />
         </LinearLayout>
     </ScrollView>
 </RelativeLayout>
