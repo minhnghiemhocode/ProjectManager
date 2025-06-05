@@ -14,19 +14,7 @@ public class BaseActivity extends AppCompatActivity {
         MaterialToolbar topAppBar = findViewById(R.id.topAppBar);
         BottomNavigationView bottomNav = findViewById(R.id.bottomNav);
 
-        if (topAppBar != null) {
-            topAppBar.setOnMenuItemClickListener(item -> {
-                int id = item.getItemId();
-                if (id == R.id.action_search) {
-                    //startActivity(new Intent(this, SearchActivity.class));
-                    return true;
-                } else if (id == R.id.action_notifications) {
-                    startActivity(new Intent(this, NotificationActivity.class));
-                    return true;
-                }
-                return false;
-            });
-        }
+
 
         if (bottomNav != null) {
             bottomNav.setOnItemSelectedListener(item -> {
@@ -40,13 +28,26 @@ public class BaseActivity extends AppCompatActivity {
                     return true;
                 } else if (id == R.id.nav_add) {
                     CreateWorkspaceBottomSheet bottomSheet = new CreateWorkspaceBottomSheet();
+
+                    // Listener gọi khi tạo workspace xong
                     bottomSheet.setWorkspaceCreateListener(newProject -> {
-                        Intent intent = new Intent(this, ProjectDetailActivity.class);
-                        intent.putExtra("workspace_id", newProject.getMaNhom());
-                        intent.putExtra("workspace_name", newProject.getTenNhom());
-                        startActivity(intent);
+                        // Lưu dữ liệu workspace tạm để dùng sau khi dialog đóng
+                        final int groupId = newProject.getMaNhom();
+                        final String title = newProject.getTenNhom();
+
+                        // Set dismiss callback sau khi hiển thị
+                        bottomSheet.show(getSupportFragmentManager(), "create_workspace");
+
+                        // Đảm bảo Intent chỉ gọi sau khi dialog đóng
+                        getSupportFragmentManager().executePendingTransactions();
+                        bottomSheet.getDialog().setOnDismissListener(dialog -> {
+                            Intent intent = new Intent(BaseActivity.this, ProjectDetailActivity.class);
+                            intent.putExtra("ma_nhom", groupId);
+                            intent.putExtra("boardTitle", title);
+                            startActivity(intent);
+                        });
                     });
-                    bottomSheet.show(getSupportFragmentManager(), "create_workspace");
+
                     return true;
                 } else if (id == R.id.nav_deadlines) {
                     startActivity(new Intent(this, DeadlineActivity.class));
@@ -55,6 +56,7 @@ public class BaseActivity extends AppCompatActivity {
                     startActivity(new Intent(this, SettingsActivity.class));
                     return true;
                 }
+
                 return false;
             });
         }

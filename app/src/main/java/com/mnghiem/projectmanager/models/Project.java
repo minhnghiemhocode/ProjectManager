@@ -64,4 +64,12 @@ public class Project {
     public int getMaNguoiTao() {
         return maNguoiTao;
     }
+
+    @SerializedName("so_task")
+    private int soTask;
+
+    public int getSoTask() {
+        return soTask;
+    }
+
 }

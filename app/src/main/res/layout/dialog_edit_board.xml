@@ -3,20 +3,53 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="24dp"
+    android:background="@android:color/white">
+
+    <!-- Tên board -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Folder name"
+        android:textStyle="bold"
+        android:textColor="#212121"
+        android:textSize="14sp"
+        android:layout_marginBottom="8dp" />
 
     <EditText
         android:id="@+id/edtBoardTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Tên board"
-        android:inputType="textCapSentences" />
+        android:hint="Enter folder name"
+        android:background="@drawable/bg_input"
+        android:inputType="textCapSentences"
+        android:padding="14dp"
+        android:textColor="#000000"
+        android:textColorHint="#9E9E9E"
+        android:textSize="16sp" />
+
+    <!-- Mô tả board -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Description"
+        android:textStyle="bold"
+        android:textColor="#212121"
+        android:textSize="14sp"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="8dp" />
 
     <EditText
         android:id="@+id/edtBoardDescription"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Mô tả board"
+        android:hint="Enter description"
+        android:background="@drawable/bg_input"
         android:inputType="textCapSentences"
-        android:layout_marginTop="12dp" />
+        android:minLines="3"
+        android:gravity="top"
+        android:padding="14dp"
+        android:textColor="#000000"
+        android:textColorHint="#9E9E9E"
+        android:textSize="16sp" />
 </LinearLayout>

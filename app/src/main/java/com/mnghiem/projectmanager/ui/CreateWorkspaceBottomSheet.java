@@ -1,6 +1,7 @@
 package com.mnghiem.projectmanager.ui;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
+import com.google.gson.Gson;
 import com.mnghiem.projectmanager.R;
 import com.mnghiem.projectmanager.api.APIClient;
 import com.mnghiem.projectmanager.api.MyAPI;
@@ -28,6 +30,8 @@ public class CreateWorkspaceBottomSheet extends BottomSheetDialogFragment {
     private EditText edtWorkspaceName;
     private Button btnCreate;
     private TextView btnCancel;
+
+    private static final String TAG = "CREATE_WS";
 
     public interface WorkspaceCreateListener {
         void onWorkspaceCreated(Project newProject);
@@ -52,10 +56,12 @@ public class CreateWorkspaceBottomSheet extends BottomSheetDialogFragment {
 
         btnCreate.setOnClickListener(v -> {
             String name = edtWorkspaceName.getText().toString().trim();
+            Log.d(TAG, "Click tạo workspace với tên: " + name);
             if (!name.isEmpty()) {
-                createWorkspace(name);
+                createWorkspaceSafe(name);
             } else {
                 edtWorkspaceName.setError("Enter workspace name");
+                Log.w(TAG, "Tên workspace rỗng!");
             }
         });
 
@@ -64,26 +70,54 @@ public class CreateWorkspaceBottomSheet extends BottomSheetDialogFragment {
         return view;
     }
 
-    private void createWorkspace(String name) {
-        MyAPI api = APIClient.getClient().create(MyAPI.class);
+    private void createWorkspaceSafe(String name) {
         String token = PrefsUtil.getToken(getContext());
+        Log.d(TAG, "Token sử dụng: " + token);
 
-        Project project = new Project(name, ""); // mô tả rỗng, mặc định riêng tư
+        Project project = new Project(name, "");
+        Log.d(TAG, "Dữ liệu gửi lên: tên = " + name + ", mô tả = \"\"");
 
-        api.createProject("Bearer " + token, project).enqueue(new Callback<Project>() {
+        MyAPI api = APIClient.getClient().create(MyAPI.class);
+        api.createProjectSafe("Bearer " + token, project).enqueue(new Callback<Project>() {
             @Override
             public void onResponse(Call<Project> call, Response<Project> response) {
-                if (response.isSuccessful() && listener != null) {
-                    listener.onWorkspaceCreated(response.body());
-                    dismiss();
+                Log.d(TAG, "API trả về code: " + response.code());
+
+                if (response.isSuccessful() && response.body() != null) {
+                    Project newProject = response.body();
+
+                    try {
+                        String json = new Gson().toJson(newProject);
+                        Log.d(TAG, "🧾 JSON server trả về: " + json);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Lỗi khi in JSON", e);
+                    }
+
+                    Log.d(TAG, "Tạo workspace thành công: " + newProject.getTenNhom());
+                    Log.d(TAG, "🔁 Project ID = " + newProject.getMaNhom());
+
+                    if (listener != null) {
+                        listener.onWorkspaceCreated(newProject); // ✅ GỌI TRƯỚC
+                    } else {
+                        Log.e(TAG, "❌ Listener bị null, không thể gửi dữ liệu project");
+                    }
+
+                    dismiss(); // ✅ GỌI SAU listener
                 } else {
                     Toast.makeText(getContext(), "Tạo thất bại!", Toast.LENGTH_SHORT).show();
+                    Log.e(TAG, "Tạo thất bại! Response null hoặc không thành công.");
+                    try {
+                        Log.e(TAG, "Error body: " + response.errorBody().string());
+                    } catch (Exception e) {
+                        Log.e(TAG, "Không đọc được error body", e);
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call<Project> call, Throwable t) {
                 Toast.makeText(getContext(), "Lỗi kết nối", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Lỗi kết nối khi tạo workspace", t);
             }
         });
     }

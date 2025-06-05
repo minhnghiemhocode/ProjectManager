@@ -2,18 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- Nút tìm kiếm -->
     <item
-        android:id="@+id/action_search"
-        android:icon="@drawable/ic_notification"
-        android:title="Search"
-        app:showAsAction="ifRoom" />
-
-    <!-- Nút thông báo -->
-    <item
-        android:id="@+id/action_notifications"
-        android:icon="@drawable/ic_notifications"
-        android:title="Notifications"
-        app:showAsAction="ifRoom" />
-
+        android:id="@+id/action_account"
+        android:icon="@drawable/ic_person"
+        android:title="Account"
+        app:showAsAction="always" />
 </menu>

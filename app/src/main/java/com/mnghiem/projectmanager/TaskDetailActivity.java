@@ -1,20 +1,21 @@
 package com.mnghiem.projectmanager;
 
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.InputType;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.*;
+import android.widget.CheckBox;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.PopupMenu;
+import android.widget.TextView;
+import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.PopupMenu;
 
 import com.mnghiem.projectmanager.api.APIClient;
 import com.mnghiem.projectmanager.api.MyAPI;
@@ -23,13 +24,8 @@ import com.mnghiem.projectmanager.models.Checklist;
 import com.mnghiem.projectmanager.models.GeneralResponse;
 import com.mnghiem.projectmanager.models.Task;
 
-import java.io.InputStream;
-import java.util.Calendar;
 import java.util.List;
 
-import okhttp3.MediaType;
-import okhttp3.MultipartBody;
-import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -37,18 +33,9 @@ import retrofit2.Response;
 public class TaskDetailActivity extends AppCompatActivity {
 
     private int taskId, currentUserId;
-    private Task currentTask;
-    private boolean isEditing = false;
-
-    private TextView tvTitle, tvDesc, tvStatus, tvPriority, tvDeadline, tvAssignee, pickDeadline, pickAssignee, btnSave;
-    private EditText etDesc;
-    private Spinner spinnerStatus, spinnerPriority;
-
+    private TextView tvTitle, tvDescription, tvStatus, tvPriority, tvDeadline, tvAssignee;
     private LinearLayout checklistContainer, attachmentContainer;
-    private TextView tvChecklistTitle, btnAddChecklist;
-    private View btnAddAttachment;
-
-    private static final int REQUEST_CODE_PICK_FILE = 101;
+    private ImageView btnBack, btnMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,243 +45,163 @@ public class TaskDetailActivity extends AppCompatActivity {
         taskId = getIntent().getIntExtra("task_id", -1);
         currentUserId = getIntent().getIntExtra("currentUserId", -1);
 
-        initViews();
-        loadTask();
-    }
-
-    private void initViews() {
         tvTitle = findViewById(R.id.tvTaskTitle);
-        tvDesc = findViewById(R.id.tvTaskDescription);
-        etDesc = findViewById(R.id.etTaskDescription);
+        tvDescription = findViewById(R.id.tvTaskDescription);
         tvStatus = findViewById(R.id.tvTaskStatus);
-        spinnerStatus = findViewById(R.id.spinnerTaskStatus);
         tvPriority = findViewById(R.id.tvTaskPriority);
-        spinnerPriority = findViewById(R.id.spinnerPriority);
         tvDeadline = findViewById(R.id.tvTaskDeadline);
-        pickDeadline = findViewById(R.id.pickTaskDeadline);
         tvAssignee = findViewById(R.id.tvTaskAssignee);
-        pickAssignee = findViewById(R.id.pickAssignee);
-        btnSave = findViewById(R.id.btnSaveChanges);
-
         checklistContainer = findViewById(R.id.checklistContainer);
-        tvChecklistTitle = findViewById(R.id.tvChecklistTitle);
-        btnAddChecklist = findViewById(R.id.btnAddChecklist);
         attachmentContainer = findViewById(R.id.attachmentContainer);
-        btnAddAttachment = findViewById(R.id.btnAddAttachment);
+        btnBack = findViewById(R.id.btnBack);
+        btnMenu = findViewById(R.id.btnTaskMenu);
 
-        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
-        findViewById(R.id.btnTaskMenu).setOnClickListener(this::showPopupMenu);
+        btnBack.setOnClickListener(v -> finish());
+        btnMenu.setOnClickListener(this::showPopupMenu);
 
-        pickDeadline.setOnClickListener(v -> showDatePicker());
-        btnSave.setOnClickListener(v -> saveChanges());
-        btnAddChecklist.setOnClickListener(v -> showAddChecklistDialog());
-        btnAddAttachment.setOnClickListener(v -> pickFileToUpload());
-
-        spinnerStatus.setAdapter(new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_dropdown_item,
-                new String[]{"hoàn thành", "chưa hoàn thành"}));
-
-        spinnerPriority.setAdapter(new ArrayAdapter<>(this,
-                android.R.layout.simple_spinner_dropdown_item,
-                new String[]{"cao", "trung_binh", "thap"}));
+        if (taskId != -1) {
+            loadTaskDetail(taskId);
+            loadAttachments(taskId);
+        }
     }
 
     private void showPopupMenu(View anchor) {
         PopupMenu popup = new PopupMenu(this, anchor);
-        popup.getMenu().add("Sửa");
-        popup.getMenu().add("Xoá task");
+        popup.getMenu().add(0, 1, 1, "Edit task");
+        popup.getMenu().add(0, 2, 2, "Delete task");
+
         popup.setOnMenuItemClickListener(item -> {
-            if (item.getTitle().equals("Sửa")) {
-                toggleEdit(true);
-            } else if (item.getTitle().equals("Xoá task")) {
+            if (item.getItemId() == 1) {
+                Intent intent = new Intent(TaskDetailActivity.this, EditTaskActivity.class);
+                intent.putExtra("task_id", taskId);
+                intent.putExtra("currentUserId", currentUserId);
+                startActivity(intent);
+                return true;
+            } else if (item.getItemId() == 2) {
                 confirmDeleteTask();
+                return true;
             }
-            return true;
+            return false;
         });
+
         popup.show();
     }
 
     private void confirmDeleteTask() {
         new AlertDialog.Builder(this)
-                .setTitle("Xoá task")
-                .setMessage("Bạn có chắc muốn xoá task này? Hành động này không thể hoàn tác.")
-                .setPositiveButton("Xoá", (dialog, which) -> {
-                    MyAPI api = APIClient.getClient().create(MyAPI.class);
-                    api.deleteTask(taskId).enqueue(new Callback<GeneralResponse>() {
-                        @Override
-                        public void onResponse(Call<GeneralResponse> call, Response<GeneralResponse> response) {
-                            finish();
-                        }
-
-                        @Override
-                        public void onFailure(Call<GeneralResponse> call, Throwable t) {
-                            Toast.makeText(TaskDetailActivity.this, "Lỗi khi xoá", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                })
-                .setNegativeButton("Hủy", null)
+                .setTitle("Confirm deletion")
+                .setMessage("Are you sure you want to delete this task?")
+                .setPositiveButton("Delete", (dialog, which) -> deleteTask())
+                .setNegativeButton("Cancel", null)
                 .show();
     }
 
-    private void loadTask() {
+    private void deleteTask() {
+        MyAPI api = APIClient.getClient().create(MyAPI.class);
+        api.deleteTask(taskId).enqueue(new Callback<GeneralResponse>() {
+            @Override
+            public void onResponse(Call<GeneralResponse> call, Response<GeneralResponse> response) {
+                if (response.isSuccessful()) {
+                    Toast.makeText(TaskDetailActivity.this, "Đã xoá task", Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(TaskDetailActivity.this, BoardDetailActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intent);
+                    finish();
+                } else {
+                    Toast.makeText(TaskDetailActivity.this, "Xoá thất bại", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GeneralResponse> call, Throwable t) {
+                Toast.makeText(TaskDetailActivity.this, "Lỗi xoá task", Toast.LENGTH_SHORT).show();
+                Log.e("TASK_DETAIL", "❌ Lỗi xoá task: " + t.getMessage());
+            }
+        });
+    }
+
+    private void loadTaskDetail(int taskId) {
         MyAPI api = APIClient.getClient().create(MyAPI.class);
         api.getTaskById(taskId).enqueue(new Callback<Task>() {
             @Override
             public void onResponse(Call<Task> call, Response<Task> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    currentTask = response.body();
-                    bindData();
+                    Task task = response.body();
+
+                    tvTitle.setText(task.getTieu_de());
+                    tvDescription.setText(task.getMo_ta() != null ? task.getMo_ta() : "Enter task description");
+                    // Trạng thái
+                    String statusLabel;
+                    switch (task.getTrang_thai()) {
+                        case "hoan_thanh":
+                            statusLabel = "Hoàn thành";
+                            break;
+                        case "dang_lam":
+                            statusLabel = "Đang làm";
+                            break;
+                        case "cho_xu_ly":
+                            statusLabel = "Chờ xử lý";
+                            break;
+                        default:
+                            statusLabel = task.getTrang_thai();
+                    }
+                    tvStatus.setText(statusLabel);
+
+// Ưu tiên
+                    String priorityLabel;
+                    switch (task.getDo_uu_tien()) {
+                        case "thap":
+                            priorityLabel = "Thấp";
+                            break;
+                        case "trung_binh":
+                            priorityLabel = "Trung bình";
+                            break;
+                        case "cao":
+                            priorityLabel = "Cao";
+                            break;
+                        default:
+                            priorityLabel = task.getDo_uu_tien();
+                    }
+                    tvPriority.setText(priorityLabel);
+
+                    tvDeadline.setText(task.getHan_hoan_thanh());
+                    tvAssignee.setText(task.getNguoiGiao() != null ? task.getNguoiGiao() : "Not assigned");
+
+                    loadChecklist(task.getMa_cv());
                 }
             }
 
             @Override
             public void onFailure(Call<Task> call, Throwable t) {
-                Log.e("TaskDetail", "Lỗi khi load task", t);
+                Log.e("TASK_DETAIL", "❌ Lỗi kết nối khi load task: " + t.getMessage());
             }
         });
     }
 
-    private void bindData() {
-        tvTitle.setText(currentTask.getTieu_de());
-        tvDesc.setText(currentTask.getMo_ta());
-        etDesc.setText(currentTask.getMo_ta());
-        tvStatus.setText("Trạng thái: " + currentTask.getTrang_thai());
-        tvPriority.setText("Ưu tiên: " + currentTask.getDo_uu_tien());
-        tvDeadline.setText("Hạn: " + currentTask.getHan_hoan_thanh());
-        pickDeadline.setText(currentTask.getHan_hoan_thanh());
-        tvAssignee.setText("Người giao: (nếu có)");
-
-        loadChecklist();
-        loadAttachments();
-    }
-
-    private void toggleEdit(boolean enable) {
-        isEditing = enable;
-        etDesc.setVisibility(enable ? View.VISIBLE : View.GONE);
-        tvDesc.setVisibility(enable ? View.GONE : View.VISIBLE);
-        spinnerStatus.setVisibility(enable ? View.VISIBLE : View.GONE);
-        tvStatus.setVisibility(enable ? View.GONE : View.VISIBLE);
-        spinnerPriority.setVisibility(enable ? View.VISIBLE : View.GONE);
-        tvPriority.setVisibility(enable ? View.GONE : View.VISIBLE);
-        pickDeadline.setVisibility(enable ? View.VISIBLE : View.GONE);
-        tvDeadline.setVisibility(enable ? View.GONE : View.VISIBLE);
-        pickAssignee.setVisibility(enable ? View.VISIBLE : View.GONE);
-        tvAssignee.setVisibility(enable ? View.GONE : View.VISIBLE);
-        btnSave.setVisibility(enable ? View.VISIBLE : View.GONE);
-        btnAddChecklist.setVisibility(enable ? View.VISIBLE : View.GONE);
-        btnAddAttachment.setVisibility(enable ? View.VISIBLE : View.GONE);
-    }
-
-    private void saveChanges() {
-        currentTask.setMo_ta(etDesc.getText().toString());
-        currentTask.setTrang_thai(spinnerStatus.getSelectedItem().toString());
-        currentTask.setDo_uu_tien(spinnerPriority.getSelectedItem().toString());
-        currentTask.setHan_hoan_thanh(pickDeadline.getText().toString());
-
-        MyAPI api = APIClient.getClient().create(MyAPI.class);
-        api.updateTask(taskId, currentTask).enqueue(new Callback<GeneralResponse>() {
-            @Override
-            public void onResponse(Call<GeneralResponse> call, Response<GeneralResponse> response) {
-                toggleEdit(false);
-                loadTask();
-            }
-
-            @Override
-            public void onFailure(Call<GeneralResponse> call, Throwable t) {
-                Log.e("TaskDetail", "Lỗi khi lưu", t);
-            }
-        });
-    }
-
-    private void showDatePicker() {
-        Calendar c = Calendar.getInstance();
-        DatePickerDialog dialog = new DatePickerDialog(this,
-                (view, year, month, dayOfMonth) -> {
-                    String dateStr = String.format("%04d-%02d-%02d", year, month + 1, dayOfMonth);
-                    pickDeadline.setText(dateStr);
-                },
-                c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
-        dialog.show();
-    }
-
-    private void showAddChecklistDialog() {
-        EditText input = new EditText(this);
-        input.setHint("Tên mục mới");
-        new AlertDialog.Builder(this)
-                .setTitle("Thêm mục checklist")
-                .setView(input)
-                .setPositiveButton("Thêm", (dialog, which) -> {
-                    String content = input.getText().toString().trim();
-                    if (!content.isEmpty()) {
-                        Checklist item = new Checklist(taskId, content);
-                        MyAPI api = APIClient.getClient().create(MyAPI.class);
-                        api.addChecklistItem(item).enqueue(new Callback<GeneralResponse>() {
-                            @Override
-                            public void onResponse(Call<GeneralResponse> call, Response<GeneralResponse> response) {
-                                loadChecklist();
-                            }
-
-                            @Override
-                            public void onFailure(Call<GeneralResponse> call, Throwable t) {
-                                Log.e("Checklist", "Lỗi thêm", t);
-                            }
-                        });
-                    }
-                })
-                .setNegativeButton("Huỷ", null)
-                .show();
-    }
-
-    private void loadChecklist() {
+    private void loadChecklist(int taskId) {
         MyAPI api = APIClient.getClient().create(MyAPI.class);
         api.getChecklistByTask(taskId).enqueue(new Callback<List<Checklist>>() {
             @Override
             public void onResponse(Call<List<Checklist>> call, Response<List<Checklist>> response) {
-                checklistContainer.removeAllViews();
                 if (response.isSuccessful() && response.body() != null) {
+                    checklistContainer.removeAllViews();
+                    LayoutInflater inflater = LayoutInflater.from(TaskDetailActivity.this);
+
                     for (Checklist item : response.body()) {
-                        View row = getLayoutInflater().inflate(R.layout.item_checklist_row, checklistContainer, false);
+                        View row = inflater.inflate(R.layout.item_checklist_row, checklistContainer, false);
                         CheckBox cb = row.findViewById(R.id.cbChecklist);
-                        ImageView btnDelete = row.findViewById(R.id.btnDeleteChecklist);
 
                         cb.setText(item.getNoiDung());
                         cb.setChecked(item.isDaHoanThanh());
+                        cb.setTextColor(item.isDaHoanThanh() ? 0xFF4CAF50 : 0xFF212121);
 
-                        cb.setOnClickListener(v -> {
-                            item.setDaHoanThanh(cb.isChecked());
-                            api.updateChecklistStatus(item.getMa_item(), item).enqueue(new Callback<GeneralResponse>() {
-                                public void onResponse(Call<GeneralResponse> call, Response<GeneralResponse> response) {}
-                                public void onFailure(Call<GeneralResponse> call, Throwable t) {}
-                            });
-                        });
+                        cb.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                            item.setDaHoanThanh(isChecked);
+                            cb.setTextColor(isChecked ? 0xFF4CAF50 : 0xFF212121);
 
-                        cb.setOnLongClickListener(v -> {
-                            EditText input = new EditText(TaskDetailActivity.this);
-                            input.setInputType(InputType.TYPE_CLASS_TEXT);
-                            input.setText(item.getNoiDung());
-                            new AlertDialog.Builder(TaskDetailActivity.this)
-                                    .setTitle("Sửa nội dung")
-                                    .setView(input)
-                                    .setPositiveButton("Lưu", (dialog, which) -> {
-                                        item.setNoiDung(input.getText().toString().trim());
-                                        api.updateChecklistStatus(item.getMa_item(), item).enqueue(new Callback<GeneralResponse>() {
-                                            public void onResponse(Call<GeneralResponse> call, Response<GeneralResponse> response) {
-                                                loadChecklist();
-                                            }
-                                            public void onFailure(Call<GeneralResponse> call, Throwable t) {}
-                                        });
-                                    })
-                                    .setNegativeButton("Hủy", null)
-                                    .show();
-                            return true;
-                        });
-
-                        btnDelete.setOnClickListener(v -> {
-                            api.deleteChecklistItem(item.getMa_item()).enqueue(new Callback<GeneralResponse>() {
+                            api.updateChecklistStatus(item.getMaItem(), item).enqueue(new Callback<GeneralResponse>() {
                                 @Override
-                                public void onResponse(Call<GeneralResponse> call, Response<GeneralResponse> response) {
-                                    loadChecklist();
-                                }
+                                public void onResponse(Call<GeneralResponse> call, Response<GeneralResponse> response) {}
 
                                 @Override
                                 public void onFailure(Call<GeneralResponse> call, Throwable t) {}
@@ -307,63 +214,44 @@ public class TaskDetailActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<List<Checklist>> call, Throwable t) {
-                Log.e("Checklist", "Lỗi load checklist", t);
-            }
+            public void onFailure(Call<List<Checklist>> call, Throwable t) {}
         });
     }
 
-    private void loadAttachments() {
+    private void loadAttachments(int taskId) {
         MyAPI api = APIClient.getClient().create(MyAPI.class);
         api.getAttachmentsByTask(taskId).enqueue(new Callback<List<Attachment>>() {
             @Override
             public void onResponse(Call<List<Attachment>> call, Response<List<Attachment>> response) {
-                attachmentContainer.removeAllViews();
                 if (response.isSuccessful() && response.body() != null) {
-                    for (Attachment a : response.body()) {
-                        TextView tv = new TextView(TaskDetailActivity.this);
-                        tv.setText(a.getDuongDan());
-                        tv.setTextColor(0xFF1976D2);
-                        attachmentContainer.addView(tv);
+                    attachmentContainer.removeAllViews();
+                    for (Attachment item : response.body()) {
+                        addAttachmentView(item);
                     }
+                    Log.d("TASK_ATTACH", "✅ Tải " + response.body().size() + " tệp đính kèm");
                 }
             }
 
             @Override
             public void onFailure(Call<List<Attachment>> call, Throwable t) {
-                Log.e("Attach", "Lỗi load attachment", t);
+                Log.e("TASK_ATTACH", "❌ Lỗi tải tệp đính kèm: " + t.getMessage());
             }
         });
     }
 
-    private void pickFileToUpload() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("*/*");
-        startActivityForResult(intent, REQUEST_CODE_PICK_FILE);
-    }
+    private void addAttachmentView(Attachment attachment) {
+        View row = LayoutInflater.from(this).inflate(R.layout.item_attachment_row, attachmentContainer, false);
+        TextView tvFileName = row.findViewById(R.id.tvFileName);
+        ImageView btnOpen = row.findViewById(R.id.btnOpenFile);
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE_PICK_FILE && resultCode == RESULT_OK && data != null) {
-            Uri fileUri = data.getData();
-            uploadFileToCloudinary(fileUri);
-        }
-    }
+        String fileName = attachment.getDuongDan().substring(attachment.getDuongDan().lastIndexOf("/") + 1);
+        tvFileName.setText(fileName);
 
-    private void uploadFileToCloudinary(Uri uri) {
-        try {
-            InputStream inputStream = getContentResolver().openInputStream(uri);
-            byte[] bytes = new byte[inputStream.available()];
-            inputStream.read(bytes);
+        btnOpen.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(attachment.getDuongDan()));
+            startActivity(intent);
+        });
 
-            RequestBody reqFile = RequestBody.create(MediaType.parse("application/octet-stream"), bytes);
-            MultipartBody.Part filePart = MultipartBody.Part.createFormData("file", "upload", reqFile);
-            RequestBody uploadPreset = RequestBody.create(MediaType.parse("multipart/form-data"), "preset");
-
-            // API gửi file → tuỳ thuộc cấu hình
-        } catch (Exception e) {
-            Log.e("Upload", "Lỗi chọn file", e);
-        }
+        attachmentContainer.addView(row);
     }
 }

@@ -1,35 +1,57 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:layout_height="60dp"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:background="@drawable/checklist_bg_gradient"
-    android:paddingVertical="6dp"
-    android:paddingHorizontal="10dp"
-    android:layout_marginBottom="8dp"
-    android:layout_marginTop="2dp"
-    android:layout_marginHorizontal="6dp"
-    android:elevation="2dp">
+    android:layout_marginHorizontal="12dp"
+    android:layout_marginTop="6dp"
+    android:layout_marginBottom="6dp"
+    android:clipToPadding="false">
 
-    <CheckBox
-        android:id="@+id/cbChecklist"
+    <!-- KHUNG GRADIENT -->
+    <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:textColor="#000000"
-        android:buttonTint="#4CAF50"
-        android:textSize="14sp"
-        android:minHeight="0dp"
-        android:padding="0dp"
-        android:layout_marginEnd="6dp" />
+        android:orientation="vertical"
+        android:background="@drawable/checklist_bg_gradient"
+        android:padding="12dp">
 
+        <!-- CheckBox hiển thị nội dung -->
+        <CheckBox
+            android:id="@+id/cbChecklist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nội dung checklist"
+            android:textColor="#212121"
+            android:textSize="15sp"
+            android:buttonTint="#000000"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp" />
+
+        <!-- EditText ẩn, dùng khi muốn sửa nội dung -->
+        <EditText
+            android:id="@+id/edtChecklist"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:textSize="15sp"
+            android:textColor="#212121"
+            android:background="@android:color/transparent"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp" />
+    </LinearLayout>
+
+    <!-- NÚT XOÁ -->
     <ImageView
         android:id="@+id/btnDeleteChecklist"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:src="@drawable/ic_cancel"
-        android:contentDescription="Xoá"
-        app:tint="#F44336"
-        android:padding="2dp" />
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="4dp"
+        android:src="@drawable/ic_delete"
+        app:tint="#BF1616"
+        android:visibility="gone"
+        android:contentDescription="Xóa checklist" />
 </LinearLayout>

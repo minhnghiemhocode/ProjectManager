@@ -227,7 +227,7 @@ public class HomeActivity extends BaseActivity {
                     showColorPicker(project.getMaNhom());
                     break;
                 case "Mời thành viên":
-                    new InviteMemberDialog(this, project.getMaNhom(), currentUserId).show();
+                    //new InviteMemberDialog(this, project.getMaNhom(), currentUserId).show();
                     break;
                 case "Xoá":
                     confirmDeleteWorkspace(project.getMaNhom());

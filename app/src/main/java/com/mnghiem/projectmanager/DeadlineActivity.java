@@ -10,8 +10,6 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import com.mnghiem.projectmanager.api.APIClient;
 import com.mnghiem.projectmanager.api.MyAPI;
 import com.mnghiem.projectmanager.models.Task;
@@ -26,7 +24,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class DeadlineActivity extends AppCompatActivity {
+public class DeadlineActivity extends BaseActivity {
 
     private LinearLayout dueSoonContainer, dueLaterContainer;
     private int currentUserId;
@@ -36,11 +34,13 @@ public class DeadlineActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_deadline);
+        setupTopAndBottomBar();
 
         dueSoonContainer = findViewById(R.id.dueSoonContainer);
         dueLaterContainer = findViewById(R.id.dueLaterContainer);
 
         currentUserId = getSharedPreferences("USER_PREF", MODE_PRIVATE).getInt("userId", -1);
+        Log.d("DEBUG_DEADLINE", "👉 userId: " + currentUserId);
 
         if (currentUserId != -1) {
             fetchUserTasks(currentUserId);
@@ -48,12 +48,22 @@ public class DeadlineActivity extends AppCompatActivity {
     }
 
     private void fetchUserTasks(int userId) {
+        Log.d("DEBUG_DEADLINE", "📤 Gửi yêu cầu lấy task với userId = " + userId);
+
         MyAPI api = APIClient.getClient().create(MyAPI.class);
-        api.getTasksByUser(userId).enqueue(new Callback<List<Task>>() {
+        api.getTasksWithDeadlines(userId).enqueue(new Callback<List<Task>>() {
             @Override
             public void onResponse(Call<List<Task>> call, Response<List<Task>> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    for (Task task : response.body()) {
+                    List<Task> tasks = response.body();
+                    Log.d("DEBUG_DEADLINE", "✅ Số lượng task nhận được: " + tasks.size());
+
+                    dueSoonContainer.removeAllViews();
+                    dueLaterContainer.removeAllViews();
+
+                    for (Task task : tasks) {
+                        Log.d("DEBUG_DEADLINE", "📌 Task: " + task.getTieu_de() + " - Hạn: " + task.getHan_hoan_thanh());
+
                         String deadline = task.getHan_hoan_thanh();
                         if (deadline != null && !deadline.trim().isEmpty()) {
                             long days = daysUntil(deadline);
@@ -65,12 +75,22 @@ public class DeadlineActivity extends AppCompatActivity {
                             }
                         }
                     }
+                    Log.d("DEBUG_DEADLINE", "✅ Có " + response.body().size() + " task");
+                } else {
+                    Log.e("DEBUG_DEADLINE", "❌ response.code = " + response.code());
+                    try {
+                        if (response.errorBody() != null) {
+                            Log.e("DEBUG_DEADLINE", "❌ response.errorBody = " + response.errorBody().string());
+                        }
+                    } catch (Exception e) {
+                        Log.e("DEBUG_DEADLINE", "❌ Lỗi khi đọc errorBody: " + e.getMessage());
+                    }
                 }
             }
 
             @Override
             public void onFailure(Call<List<Task>> call, Throwable t) {
-                Log.e("DeadlineActivity", "Failed to fetch tasks: " + t.getMessage());
+                Log.e("DEBUG_DEADLINE", "❌ Lỗi kết nối: " + t.getMessage());
             }
         });
     }
@@ -96,7 +116,7 @@ public class DeadlineActivity extends AppCompatActivity {
 
         GradientDrawable gradient = new GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
-                new int[]{Color.parseColor("#FFF9C4"), Color.WHITE}
+                new int[]{Color.parseColor("#FFF8C4"), Color.WHITE}
         );
         gradient.setCornerRadius(40f);
         card.setBackground(gradient);
@@ -127,7 +147,9 @@ public class DeadlineActivity extends AppCompatActivity {
 
         card.setOnClickListener(v -> {
             Intent intent = new Intent(this, TaskDetailActivity.class);
-            intent.putExtra("ma_cong_viec", task.getMa_cv());
+            intent.putExtra("task_id", task.getMa_cv());  // 🔥 fix đúng key
+            intent.putExtra("currentUserId", currentUserId);
+            Log.d("DeadlineActivity", "🟢 Open TaskDetailActivity with taskId = " + task.getMa_cv());
             startActivity(intent);
         });
 

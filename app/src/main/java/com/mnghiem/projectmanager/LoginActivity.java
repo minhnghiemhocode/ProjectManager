@@ -87,18 +87,22 @@ public class LoginActivity extends AppCompatActivity {
                 public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         if (response.body().isSuccess()) {
-                            String token = response.body().getToken(); // 👈 Lấy token từ phản hồi
-                            PrefsUtil.saveToken(LoginActivity.this, token); // 👈 Lưu lại token
+                            String token = response.body().getToken();
+                            int userId = response.body().getUser().getMaNd();
 
-                            int userId = response.body().getUser().getMaNd(); // 👈 Lấy userId
+                            PrefsUtil.saveToken(LoginActivity.this, token);
                             getSharedPreferences("USER_PREF", MODE_PRIVATE)
                                     .edit()
-                                    .putInt("userId", userId)                     // 👈 Lưu userId
+                                    .putInt("userId", userId)
+                                    .putString("token", token)   // ✅ THÊM DÒNG NÀY
                                     .apply();
 
-                            Log.d("LOGIN_TOKEN", "Lưu token: " + token); // 👈 Log để kiểm tra
+                            Log.d("LOGIN_TOKEN", "✅ Lưu token: " + token + ", userId = " + userId);
                             Toast.makeText(LoginActivity.this, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            intent.putExtra("userId", userId); // optional
+                            startActivity(intent);
                             finish();
                         } else {
                             String message = response.body().getMessage();
@@ -126,6 +130,28 @@ public class LoginActivity extends AppCompatActivity {
             Intent signInIntent = mGoogleSignInClient.getSignInIntent();
             startActivityForResult(signInIntent, 1001);
         });
+
+        // Xử lý hiện/ẩn mật khẩu khi bấm vào icon con mắt
+        etPassword.setOnTouchListener((v, event) -> {
+            final int DRAWABLE_END = 2;
+            if (event.getAction() == android.view.MotionEvent.ACTION_UP) {
+                if (event.getRawX() >= (etPassword.getRight()
+                        - etPassword.getCompoundDrawables()[DRAWABLE_END].getBounds().width())) {
+                    int selection = etPassword.getSelectionEnd();
+                    if (etPassword.getInputType() == (android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD)) {
+                        etPassword.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                        etPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_visibility, 0);
+                    } else {
+                        etPassword.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                        etPassword.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_visibility_off, 0);
+                    }
+                    etPassword.setSelection(selection);
+                    return true;
+                }
+            }
+            return false;
+        });
+
     }
 
     @Override
@@ -153,18 +179,23 @@ public class LoginActivity extends AppCompatActivity {
         api.loginWithGoogle(request).enqueue(new Callback<LoginResponse>() {
             @Override
             public void onResponse(Call<LoginResponse> call, Response<LoginResponse> response) {
-                Log.d("DEBUG_RESPONSE_CODE", "Response Code: " + response.code());
-
-                if (response.body() != null) {
-                    Log.d("DEBUG_RESPONSE_BODY", "Response Body: success=" + response.body().isSuccess()
-                            + ", message=" + response.body().getMessage());
-                } else {
-                    Log.w("DEBUG_RESPONSE_BODY", "Response Body is null!");
-                }
-
                 if (response.isSuccessful() && response.body() != null && response.body().isSuccess()) {
+                    String token = response.body().getToken();
+                    int userId = response.body().getUser().getMaNd();
+
+                    PrefsUtil.saveToken(LoginActivity.this, token);
+                    getSharedPreferences("USER_PREF", MODE_PRIVATE)
+                            .edit()
+                            .putInt("userId", userId)
+                            .putString("token", token)   // ✅ THÊM DÒNG NÀY
+                            .apply();
+
+                    Log.d("LOGIN_GOOGLE", "✅ Lưu token: " + token + ", userId = " + userId);
                     Toast.makeText(LoginActivity.this, "Google login thành công!", Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+
+                    Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                    intent.putExtra("userId", userId);
+                    startActivity(intent);
                     finish();
                 } else {
                     Toast.makeText(LoginActivity.this, "Google login thất bại", Toast.LENGTH_SHORT).show();

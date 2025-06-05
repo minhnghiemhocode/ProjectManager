@@ -28,7 +28,6 @@ public interface MyAPI {
     @POST("auth/resend-otp")
     Call<GeneralResponse> resendOtp(@Body ResendOtpRequest request);
 
-
     // USER
 
     @GET("user/by-id")
@@ -70,15 +69,18 @@ public interface MyAPI {
     @PUT("project/color/{id}")
     Call<GeneralResponse> updateGroupColor(@Path("id") int id, @Body ColorRequest request);
 
-    @POST("project/invite")
-    Call<GeneralResponse> inviteUser(@Body InviteRequest request);
+    @POST("group/invite")
+    Call<GeneralResponse> inviteMemberToGroup(
+            @Body InviteRequest request,
+            @Header("Authorization") String token
+    );
+
 
     @GET("project/creator/{groupId}")
     Call<Integer> getGroupCreator(@Path("groupId") int groupId);
 
     @GET("project/boards")
     Call<List<Board>> getBoardsByGroup(@Query("ma_nhom") int groupId);
-
 
     // BOARD
 
@@ -96,8 +98,6 @@ public interface MyAPI {
 
     @DELETE("board/{id}")
     Call<GeneralResponse> deleteBoard(@Path("id") int id);
-
-
 
     // TASK
 
@@ -134,7 +134,8 @@ public interface MyAPI {
     @GET("tasks/{ma_cv}")
     Call<Task> getTaskById(@Path("ma_cv") int ma_cv);
 
-
+    @GET("tasks/by-board-android")
+    Call<List<Task>> getTasksByBoardAndroid(@Query("boardId") int boardId);
 
     // CHECKLIST
 
@@ -150,6 +151,8 @@ public interface MyAPI {
     @DELETE("checklist/{ma_item}")
     Call<GeneralResponse> deleteChecklistItem(@Path("ma_item") int id);
 
+    @PUT("checklist/{ma_item}/content")
+    Call<GeneralResponse> updateChecklistContent(@Path("ma_item") int id, @Body Checklist item);
 
     // NOTIFICATION
 
@@ -158,7 +161,6 @@ public interface MyAPI {
 
     @PUT("notifications/read/{ma_tb}")
     Call<GeneralResponse> markNotificationAsRead(@Path("ma_tb") int notificationId);
-
 
     // USER SETTINGS
 
@@ -171,13 +173,96 @@ public interface MyAPI {
     @POST("settings/language")
     Call<GeneralResponse> updateLanguage(@Body Setting setting);
 
-    // ATTACHMENT
 
+    // STATISTICS (ĐÃ CHUẨN HÓA THEO StatisticsActivity)
+
+    @GET("statistics/overview")
+    Call<Statistic> getOverview(
+            @Query("userId") int userId,
+            @Query("startDate") String startDate,
+            @Query("endDate") String endDate
+    );
+
+    @GET("statistics/by-group")
+    Call<List<Statistic>> getStatsByGroup(
+            @Query("groupId") int groupId,
+            @Query("startDate") String startDate,
+            @Query("endDate") String endDate
+    );
+
+    @GET("statistics/by-user")
+    Call<List<Statistic>> getStatsByUser(
+            @Query("userId") int userId,
+            @Query("startDate") String startDate,
+            @Query("endDate") String endDate
+    );
+
+
+    @GET("statistics/total")
+    Call<List<Statistic>> getTotalStats(@Query("userId") int userId);
+
+    @GET("statistics/suggestions")
+    Call<String> getSmartSuggestions(
+            @Query("userId") int userId,
+            @Query("startDate") String startDate,
+            @Query("endDate") String endDate
+    );
+
+    @GET("statistics/user-detail")
+    Call<Statistic> getUserDetailStats(
+            @Query("userId") int userId,
+            @Query("startDate") String startDate,
+            @Query("endDate") String endDate
+    );
+
+    @GET("statistics/ai-data") // ✅ đúng
+    Call<List<Task>> getAIData(@Query("userId") int userId);
+
+    @PUT("user/{id}")
+    Call<GeneralResponse> updateUserInfo(@Path("id") int userId, @Body User updatedUser);
+
+    @POST("project/safe")
+    Call<Project> createProjectSafe(@Header("Authorization") String token, @Body Project project);
+
+    // ✅ Gửi lời mời nếu người dùng chưa đăng ký (không cần token)
+    @POST("group/invite")
+    Call<GeneralResponse> inviteUserWithoutToken(@Body InviteRequest request);
+
+    // ✅ Gửi lời mời + thêm vào nhóm nếu đã có tài khoản (cần token)
+    @POST("group/invite-auth")
+    Call<GeneralResponse> inviteUserWithToken(
+            @Body InviteRequest request,
+            @Header("Authorization") String token
+    );
+
+    // ✅ Gửi mail nếu người được giao chưa có tài khoản
+    @POST("group/assign")
+    Call<GeneralResponse> assignUserWithoutToken(@Body AssignRequest request);
+
+    // ✅ Gửi mail + phân công nếu người đó đã có tài khoản (cần token)
+    @POST("group/assign-auth")
+    Call<GeneralResponse> assignUserWithToken(
+            @Body AssignRequest request,
+            @Header("Authorization") String token
+    );
+
+    // ✅ Upload file đính kèm
+    @Multipart
+    @POST("attachments/upload")
+    Call<GeneralResponse> uploadAttachment(
+            @Part MultipartBody.Part file,
+            @Part("taskId") RequestBody taskId,
+            @Part("userId") RequestBody userId
+    );
+
+    // ✅ Lấy danh sách tệp đính kèm theo công việc
     @GET("attachments/{ma_cv}")
     Call<List<Attachment>> getAttachmentsByTask(@Path("ma_cv") int taskId);
 
-    @PUT("checklist/{ma_item}/content")
-    Call<GeneralResponse> updateChecklistContent(@Path("ma_item") int id, @Body Checklist item);
+    @GET("project/counts/{userId}")
+    Call<List<Project>> getProjectCountsByUser(@Path("userId") int userId);
 
+    @GET("board/group/{groupId}/with-task-counts")
+    Call<List<Board>> getBoardsWithTaskCounts(@Path("groupId") int groupId);
 
 }

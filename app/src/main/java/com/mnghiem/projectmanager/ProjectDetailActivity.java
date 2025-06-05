@@ -1,13 +1,15 @@
 package com.mnghiem.projectmanager;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.FrameLayout;
+import android.widget.GridLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupMenu;
@@ -33,11 +35,10 @@ import retrofit2.Response;
 public class ProjectDetailActivity extends AppCompatActivity {
 
     private ImageView btnBack, btnMenu;
-    private TextView tvBoardTitle, tvVisibility;
+    private TextView tvBoardTitle, tvBoardDescription;
     private LinearLayout avatarsContainer, pinnedContainer, boardContainer;
-    private int groupId;
-    private int currentUserId = -1;
-    private int creatorId = -1;
+    private int groupId, currentUserId = -1, creatorId = -1;
+    private String currentToken = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,28 +48,36 @@ public class ProjectDetailActivity extends AppCompatActivity {
         btnBack = findViewById(R.id.btnBack);
         btnMenu = findViewById(R.id.btnMenu);
         tvBoardTitle = findViewById(R.id.tvBoardTitle);
-        tvVisibility = findViewById(R.id.tvVisibility);
+        tvBoardDescription = findViewById(R.id.tvBoardDescription);
         avatarsContainer = findViewById(R.id.avatarsContainer);
         pinnedContainer = findViewById(R.id.pinnedContainer);
         boardContainer = findViewById(R.id.boardContainer);
 
         btnBack.setOnClickListener(v -> finish());
         btnMenu.setOnClickListener(this::showPopupMenu);
-        tvBoardTitle.setText("Workspace Detail");
-        tvVisibility.setText("Public");
 
+        // Nhận dữ liệu từ Intent
         groupId = getIntent().getIntExtra("ma_nhom", -1);
-        currentUserId = getSharedPreferences("USER_PREF", MODE_PRIVATE).getInt("userId", -1);
-        Log.d("DEBUG_PROJECT_FLOW", "🟢 ProjectDetailActivity nhận: groupId=" + groupId + ", currentUserId=" + currentUserId);
+        currentUserId = getIntent().getIntExtra("currentUserId", -1);
+        String boardTitle = getIntent().getStringExtra("boardTitle");
+        String boardDescription = getIntent().getStringExtra("boardDescription");
+
+        if (boardTitle != null) tvBoardTitle.setText(boardTitle);
+        if (boardDescription != null) tvBoardDescription.setText(boardDescription);
+
+        // Lấy token từ SharedPreferences
+        SharedPreferences prefs = getSharedPreferences("USER_PREF", MODE_PRIVATE);
+        currentToken = prefs.getString("token", null);
+
         if (groupId != -1) {
-            loadBoardsByGroup(groupId);
             getGroupCreator(groupId);
+            loadBoardsByGroup(groupId);
         }
     }
 
     private void loadBoardsByGroup(int groupId) {
         MyAPI api = APIClient.getClient().create(MyAPI.class);
-        api.getBoardsByGroup(groupId).enqueue(new Callback<List<Board>>() {
+        api.getBoardsWithTaskCounts(groupId).enqueue(new Callback<List<Board>>() {
             @Override
             public void onResponse(Call<List<Board>> call, Response<List<Board>> response) {
                 if (response.isSuccessful() && response.body() != null) {
@@ -111,24 +120,17 @@ public class ProjectDetailActivity extends AppCompatActivity {
 
     private View createBoardCard(Board board) {
         View view = LayoutInflater.from(this).inflate(R.layout.item_board, null);
+        LinearLayout bg = view.findViewById(R.id.bgBoard);
 
-        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+// Thêm đoạn này để giới hạn chiều rộng + margin hai bên
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
                 LinearLayout.LayoutParams.WRAP_CONTENT
         );
-        params.setMargins(0, 0, 0, 40);
-        view.setLayoutParams(params);
+        layoutParams.setMargins(68, 24, 68, 24);  // khoảng cách giữa các card và lề
+        bg.setLayoutParams(layoutParams);
 
-        TextView tvTitle = view.findViewById(R.id.tvBoardTitle);
-        TextView tvDesc = view.findViewById(R.id.tvBoardDescription);
-        TextView tvTaskStat = view.findViewById(R.id.tvTaskStat);
-        LinearLayout bg = view.findViewById(R.id.bgBoard);
-        ImageView btnMore = view.findViewById(R.id.btnMore);
-
-        tvTitle.setText(board.getTitle());
-        tvDesc.setText(board.getDescription());
-        tvTaskStat.setText(board.getSoTask() + " tasks");
-
+// Gradient nền và bo góc
         GradientDrawable gradient = new GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
                 new int[]{Color.parseColor(board.getBackgroundColor()), Color.WHITE}
@@ -136,46 +138,59 @@ public class ProjectDetailActivity extends AppCompatActivity {
         gradient.setCornerRadius(40f);
         bg.setBackground(gradient);
         bg.setElevation(12f);
+        bg.setPadding(32, 32, 32, 32);
+
+        TextView tvTitle = view.findViewById(R.id.tvBoardTitle);
+        TextView tvDesc = view.findViewById(R.id.tvBoardDescription);
+        TextView tvTaskStat = view.findViewById(R.id.tvTaskStat);
+        ImageView btnMore = view.findViewById(R.id.btnMore);
+
+        tvTitle.setText(board.getTitle());
+        tvDesc.setText(board.getDescription());
+        tvTaskStat.setText(board.getSoTask() + " tasks");
+
+        gradient.setColors(new int[]{Color.parseColor(board.getBackgroundColor()), Color.WHITE});
+
+        gradient.setCornerRadius(40f);
+        bg.setBackground(gradient);
+        bg.setElevation(12f);
+        bg.setPadding(32, 32, 32, 32);
 
         btnMore.setOnClickListener(v -> showBoardMenu(v, board));
 
-        // 👉 Khi nhấn vào toàn bộ card sẽ mở BoardDetailActivity
         view.setOnClickListener(v -> {
-            Intent intent = new Intent(ProjectDetailActivity.this, BoardDetailActivity.class);
+            Intent intent = new Intent(this, BoardDetailActivity.class);
             intent.putExtra("board_id", board.getBoardId());
             intent.putExtra("board_title", board.getTitle());
+            intent.putExtra("board_description", board.getDescription());
             intent.putExtra("group_id", groupId);
             intent.putExtra("currentUserId", currentUserId);
-            Log.d("DEBUG_PROJECT_FLOW", "➡️ Mở BoardDetailActivity với boardId=" + board.getBoardId()
-                    + ", groupId=" + groupId + ", userId=" + currentUserId);
             startActivity(intent);
         });
 
         return view;
     }
 
-
     private void showBoardMenu(View anchor, Board board) {
         PopupMenu popup = new PopupMenu(this, anchor);
-        popup.getMenu().add("Sửa");
-        popup.getMenu().add("Đổi màu");
-        popup.getMenu().add(board.isPinned() ? "Bỏ ghim" : "Ghim");
-        popup.getMenu().add("Xoá");
+        popup.getMenu().add("Edit folder");
+        popup.getMenu().add("Change color");
+        popup.getMenu().add(board.isPinned() ? "Unpin folder" : "Pin folder");
+        popup.getMenu().add("Delete folder");
 
         popup.setOnMenuItemClickListener(item -> {
-            String title = item.getTitle().toString();
-            switch (title) {
-                case "Sửa":
+            switch (item.getTitle().toString()) {
+                case "Edit folder":
                     showEditBoardDialog(board);
                     break;
-                case "Đổi màu":
+                case "Change color":
                     showColorPicker(board);
                     break;
-                case "Ghim":
-                case "Bỏ ghim":
+                case "Pin folder":
+                case "Unpin folder":
                     toggleBoardPin(board);
                     break;
-                case "Xoá":
+                case "Delete folder":
                     confirmDeleteBoard(board);
                     break;
             }
@@ -210,19 +225,14 @@ public class ProjectDetailActivity extends AppCompatActivity {
         edtDesc.setText(board.getDescription());
 
         new AlertDialog.Builder(this)
-                .setTitle("Sửa board")
+                .setTitle("Edit Folder")
                 .setView(dialogView)
-                .setPositiveButton("Lưu", (dialog, which) -> {
-                    String newTitle = edtTitle.getText().toString().trim();
-                    String newDesc = edtDesc.getText().toString().trim();
-
-                    if (!newTitle.equals(board.getTitle()) || !newDesc.equals(board.getDescription())) {
-                        board.setTitle(newTitle);
-                        board.setDescription(newDesc);
-                        updateBoardInfo(board);
-                    }
+                .setPositiveButton("Save", (dialog, which) -> {
+                    board.setTitle(edtTitle.getText().toString().trim());
+                    board.setDescription(edtDesc.getText().toString().trim());
+                    updateBoardInfo(board);
                 })
-                .setNegativeButton("Huỷ", null)
+                .setNegativeButton("Cancel", null)
                 .show();
     }
 
@@ -243,10 +253,10 @@ public class ProjectDetailActivity extends AppCompatActivity {
 
     private void confirmDeleteBoard(Board board) {
         new AlertDialog.Builder(this)
-                .setTitle("Xoá board")
-                .setMessage("Bạn có chắc muốn xoá board này?")
-                .setPositiveButton("Xoá", (dialog, which) -> deleteBoard(board.getBoardId()))
-                .setNegativeButton("Huỷ", null)
+                .setTitle("Delete folder")
+                .setMessage("Are you sure you want to delete this folder?")
+                .setPositiveButton("Delete", (dialog, which) -> deleteBoard(board.getBoardId()))
+                .setNegativeButton("Cancel", null)
                 .show();
     }
 
@@ -266,12 +276,47 @@ public class ProjectDetailActivity extends AppCompatActivity {
     }
 
     private void showColorPicker(Board board) {
-        String[] colors = {"#FF8A65", "#4CAF50", "#2196F3", "#FFD600", "#AB47BC"};
-        new AlertDialog.Builder(this)
-                .setTitle("Chọn màu")
-                .setItems(colors, (dialog, which) -> updateBoardColor(board.getBoardId(), colors[which]))
-                .show();
+        View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_color_picker, null);
+        GridLayout gridLayout = dialogView.findViewById(R.id.colorGrid);
+
+        String[] colors = {
+                "#A1887F", "#EF5350", "#F4511E", "#FFB300", "#FFF176", "#FFEB3B",
+                "#42A5F5", "#90CAF9", "#B2EBF2", "#4DB6AC", "#4CAF50", "#AED581",
+                "#E0E0E0", "#BDBDBD", "#F8BBD0", "#CE93D8", "#9575CD", "#9FA8DA"
+        };
+
+        AlertDialog alertDialog = new AlertDialog.Builder(this).setView(dialogView).create();
+
+        for (String hexColor : colors) {
+            FrameLayout wrapper = new FrameLayout(this);
+            View colorView = new View(this);
+
+            int size = (int) getResources().getDisplayMetrics().density * 40;
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(size, size);
+            colorView.setLayoutParams(params);
+            colorView.setBackground(createCircleDrawable(hexColor));
+
+            colorView.setOnClickListener(v -> {
+                updateBoardColor(board.getBoardId(), hexColor);
+                alertDialog.dismiss();
+            });
+
+            wrapper.setPadding(8, 8, 8, 8);
+            wrapper.addView(colorView);
+            gridLayout.addView(wrapper);
+        }
+
+        alertDialog.show();
     }
+
+    private GradientDrawable createCircleDrawable(String colorHex) {
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setShape(GradientDrawable.OVAL);
+        drawable.setColor(Color.parseColor(colorHex));
+        drawable.setSize(100, 100);
+        return drawable;
+    }
+
 
     private void updateBoardColor(int boardId, String color) {
         MyAPI api = APIClient.getClient().create(MyAPI.class);
@@ -292,29 +337,22 @@ public class ProjectDetailActivity extends AppCompatActivity {
         PopupMenu popup = new PopupMenu(this, anchor);
         popup.getMenuInflater().inflate(R.menu.popup_workspace_menu, popup.getMenu());
 
-        // Nếu không phải creator, ẩn hai chức năng đặc biệt
-        //if (currentUserId != creatorId) {
-        //    popup.getMenu().findItem(R.id.menu_delete).setVisible(false);
-        //    popup.getMenu().findItem(R.id.menu_invite).setVisible(false);
-        //}
-
         popup.setOnMenuItemClickListener(item -> {
-            int itemId = item.getItemId();
-            if (itemId == R.id.menu_add_board) {
+            int id = item.getItemId();
+            if (id == R.id.menu_add_board) {
                 startActivity(new Intent(this, AddBoardActivity.class).putExtra("ma_nhom", groupId));
                 return true;
-            } else if (itemId == R.id.menu_edit) {
+            } else if (id == R.id.menu_edit) {
                 showEditWorkspaceDialog();
                 return true;
-            } else if (itemId == R.id.menu_delete) {
+            } else if (id == R.id.menu_delete) {
                 confirmDeleteWorkspace();
                 return true;
-            } else if (itemId == R.id.menu_invite) {
-                new InviteMemberDialog(this, groupId, currentUserId).show();
+            } else if (id == R.id.menu_invite) {
+                new InviteMemberDialog(this, groupId, currentUserId, currentToken).show();
                 return true;
-            } else {
-                return false;
             }
+            return false;
         });
 
         popup.show();
@@ -326,38 +364,30 @@ public class ProjectDetailActivity extends AppCompatActivity {
         EditText edtDesc = dialogView.findViewById(R.id.edtBoardDescription);
 
         edtTitle.setText(tvBoardTitle.getText().toString().trim());
-        edtDesc.setText(tvVisibility.getText().toString().trim());
+        edtDesc.setText(tvBoardDescription.getText().toString().trim());
 
         new AlertDialog.Builder(this)
-                .setTitle("Sửa workspace")
+                .setTitle("Edit project")
                 .setView(dialogView)
-                .setPositiveButton("Lưu", (dialog, which) -> {
-                    String newTitle = edtTitle.getText().toString().trim();
-                    String newDesc = edtDesc.getText().toString().trim();
+                .setPositiveButton("Save", (dialog, which) -> {
+                    tvBoardTitle.setText(edtTitle.getText().toString().trim());
+                    tvBoardDescription.setText(edtDesc.getText().toString().trim());
 
-                    boolean changed = !newTitle.equals(tvBoardTitle.getText().toString()) ||
-                            !newDesc.equals(tvVisibility.getText().toString());
-
-                    if (changed) {
-                        tvBoardTitle.setText(newTitle);
-                        tvVisibility.setText(newDesc);
-
-                        MyAPI api = APIClient.getClient().create(MyAPI.class);
-                        Project updated = new Project(newTitle, newDesc);
-                        api.updateGroup(groupId, updated).enqueue(new Callback<GeneralResponse>() {
-                            @Override
-                            public void onResponse(Call<GeneralResponse> call, Response<GeneralResponse> response) {
-                                if (!response.isSuccessful()) {
-                                    Toast.makeText(ProjectDetailActivity.this, "Lỗi khi cập nhật workspace", Toast.LENGTH_SHORT).show();
-                                }
+                    Project updated = new Project(edtTitle.getText().toString().trim(), edtDesc.getText().toString().trim());
+                    MyAPI api = APIClient.getClient().create(MyAPI.class);
+                    api.updateGroup(groupId, updated).enqueue(new Callback<GeneralResponse>() {
+                        @Override
+                        public void onResponse(Call<GeneralResponse> call, Response<GeneralResponse> response) {
+                            if (!response.isSuccessful()) {
+                                Toast.makeText(ProjectDetailActivity.this, "Lỗi cập nhật", Toast.LENGTH_SHORT).show();
                             }
+                        }
 
-                            @Override
-                            public void onFailure(Call<GeneralResponse> call, Throwable t) {
-                                Toast.makeText(ProjectDetailActivity.this, "Không thể cập nhật workspace", Toast.LENGTH_SHORT).show();
-                            }
-                        });
-                    }
+                        @Override
+                        public void onFailure(Call<GeneralResponse> call, Throwable t) {
+                            Toast.makeText(ProjectDetailActivity.this, "Lỗi kết nối", Toast.LENGTH_SHORT).show();
+                        }
+                    });
                 })
                 .setNegativeButton("Huỷ", null)
                 .show();
@@ -365,10 +395,10 @@ public class ProjectDetailActivity extends AppCompatActivity {
 
     private void confirmDeleteWorkspace() {
         new AlertDialog.Builder(this)
-                .setTitle("Xoá nhóm")
-                .setMessage("Bạn có chắc chắn muốn xoá nhóm này không?")
-                .setPositiveButton("Xoá", (dialog, which) -> deleteWorkspace())
-                .setNegativeButton("Huỷ", null)
+                .setTitle("Delete project")
+                .setMessage("Are you sure you want to delete this project?")
+                .setPositiveButton("Delete", (dialog, which) -> deleteWorkspace())
+                .setNegativeButton("Cancel", null)
                 .show();
     }
 

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/registerRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -13,49 +14,85 @@
         android:padding="32dp"
         android:gravity="center_horizontal">
 
+        <!-- Logo ứng dụng -->
+        <ImageView
+            android:id="@+id/imgAppLogo"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginBottom="16dp"
+            android:src="@drawable/logo"
+            android:contentDescription="App Logo" />
+
         <!-- Tiêu đề -->
         <TextView
             android:id="@+id/tvRegisterTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Create Account"
-            android:textSize="28sp"
+            android:textSize="30sp"
             android:textStyle="bold"
-            android:textColor="#333333"
-            android:layout_marginBottom="24dp" />
+            android:textColor="#212121"
+            android:layout_marginBottom="32dp"
+            android:letterSpacing="0.05" />
 
         <!-- Email -->
-        <EditText
-            android:id="@+id/etRegisterEmail"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Email"
-            android:inputType="textEmailAddress"
-            android:background="@android:drawable/edit_text"
-            android:padding="12dp"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:boxStrokeColor="#1976D2"
+            app:hintTextColor="#9E9E9E">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etRegisterEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Email"
+                android:inputType="textEmailAddress"
+                android:padding="12dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Mật khẩu -->
-        <EditText
-            android:id="@+id/etRegisterPassword"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Password"
-            android:inputType="textPassword"
-            android:background="@android:drawable/edit_text"
-            android:padding="12dp"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="16dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:endIconMode="password_toggle"
+            app:boxStrokeColor="#1976D2"
+            app:hintTextColor="#9E9E9E">
 
-        <!-- Nhập lại mật khẩu -->
-        <EditText
-            android:id="@+id/etRegisterConfirmPassword"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etRegisterPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Password"
+                android:inputType="textPassword"
+                android:padding="12dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Xác nhận mật khẩu -->
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Confirm Password"
-            android:inputType="textPassword"
-            android:background="@android:drawable/edit_text"
-            android:padding="12dp"
-            android:layout_marginBottom="20dp" />
+            android:layout_marginBottom="24dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            app:endIconMode="password_toggle"
+            app:boxStrokeColor="#1976D2"
+            app:hintTextColor="#9E9E9E">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etRegisterConfirmPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Confirm Password"
+                android:inputType="textPassword"
+                android:padding="12dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
 
         <!-- Nút Đăng ký -->
         <Button
@@ -63,17 +100,25 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Register"
-            android:backgroundTint="#4CAF50"
+            android:textAllCaps="false"
+            android:textSize="16sp"
             android:textColor="#FFFFFF"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="20dp"
+            android:paddingVertical="12dp"
+            android:letterSpacing="0.05"
+            android:elevation="0dp"
+            app:backgroundTint="@null"
+            android:background="@drawable/button_gradient" />
 
-        <!-- Quay về màn hình đăng nhập -->
+        <!-- Chuyển về màn hình đăng nhập -->
         <TextView
             android:id="@+id/tvGoToLogin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Already have an account? Login"
-            android:textColor="#1976D2" />
+            android:textSize="14sp"
+            android:textColor="#1976D2"
+            android:paddingVertical="8dp" />
 
     </LinearLayout>
 </ScrollView>

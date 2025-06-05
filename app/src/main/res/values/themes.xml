@@ -1,9 +1,36 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+
+    <!-- Base application theme -->
     <style name="Base.Theme.ProjectManager" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+
+        <item name="materialButtonStyle">@style/Widget.Material3.Button.TextButton</item>
+        <item name="materialThemeOverlay">@null</item>
+        <!-- Nền trắng, chữ đen -->
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorOnPrimary">@color/black</item>
+
+        <item name="colorSecondary">@color/white</item>
+        <item name="colorOnSecondary">@color/black</item>
+
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/black</item>
+
+        <!-- Dùng đúng key để đổi màu nền hệ thống -->
+        <item name="android:windowBackground">@color/white</item>
+
+        <!-- Màu viền, ripple, tertiary -->
+        <item name="colorOutline">@color/black</item>
+        <item name="colorTertiary">@color/white</item>
+        <item name="colorOnTertiary">@color/black</item>
+
+        <!-- Nền cho các item được chọn -->
+        <item name="colorSurfaceVariant">@color/white</item>
+
+        <item name="popupMenuStyle">@style/PlainPopupMenu</item>
+
+        <item name="android:popupMenuStyle">@style/PlainPopupMenu</item>
     </style>
+
 
     <style name="Theme.ProjectManager" parent="Base.Theme.ProjectManager" />
 </resources>

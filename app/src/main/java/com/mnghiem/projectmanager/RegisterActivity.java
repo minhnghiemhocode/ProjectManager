@@ -3,12 +3,12 @@ package com.mnghiem.projectmanager;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.material.textfield.TextInputEditText;
 import com.mnghiem.projectmanager.api.APIClient;
 import com.mnghiem.projectmanager.api.MyAPI;
 import com.mnghiem.projectmanager.models.RegisterRequest;
@@ -20,7 +20,7 @@ import retrofit2.Response;
 
 public class RegisterActivity extends AppCompatActivity {
 
-    private EditText etEmail, etPassword, etConfirmPassword;
+    private TextInputEditText etEmail, etPassword, etConfirmPassword;
     private Button btnRegister;
     private TextView tvGoToLogin;
 
@@ -66,9 +66,8 @@ public class RegisterActivity extends AppCompatActivity {
                         if (response.body().isSuccess()) {
                             Toast.makeText(RegisterActivity.this, "Vui lòng kiểm tra email để xác minh.", Toast.LENGTH_SHORT).show();
 
-                            // 👉 Chuyển sang màn xác minh OTP
                             Intent intent = new Intent(RegisterActivity.this, VerifyOtpActivity.class);
-                            intent.putExtra("email", email); // Gửi email để xác minh
+                            intent.putExtra("email", email);
                             startActivity(intent);
                             finish();
                         } else {

@@ -1,17 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView android:id="@+id/main"
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:background="#FFFFFF">
+    android:background="#FFFFFF"
+    android:fitsSystemWindows="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:padding="32dp">
+        android:padding="32dp"
+        android:gravity="center_horizontal">
+
+        <!-- Logo ứng dụng -->
+        <ImageView
+            android:id="@+id/appLogo"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/logo"
+            android:contentDescription="App Logo"
+            android:layout_marginBottom="24dp" />
 
         <!-- Tiêu đề ứng dụng -->
         <TextView
@@ -19,9 +29,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Project Manager"
-            android:textSize="28sp"
+            android:textSize="26sp"
             android:textStyle="bold"
-            android:textColor="#333333"
+            android:textColor="#212121"
             android:layout_marginBottom="24dp" />
 
         <!-- Email -->
@@ -31,8 +41,10 @@
             android:layout_height="wrap_content"
             android:hint="Email"
             android:inputType="textEmailAddress"
-            android:background="@android:drawable/edit_text"
-            android:padding="12dp"
+            android:padding="14dp"
+            android:background="@drawable/bg_input"
+            android:textColor="#000000"
+            android:textColorHint="#9E9E9E"
             android:layout_marginBottom="16dp" />
 
         <!-- Mật khẩu -->
@@ -42,23 +54,30 @@
             android:layout_height="wrap_content"
             android:hint="Password"
             android:inputType="textPassword"
-            android:background="@android:drawable/edit_text"
-            android:padding="12dp"
+            android:padding="14dp"
+            android:background="@drawable/bg_input"
+            android:textColor="#000000"
+            android:textColorHint="#9E9E9E"
+            android:drawableEnd="@drawable/ic_visibility_off"
+            android:focusable="true"
+            android:clickable="true"
+            android:importantForAccessibility="yes"
             android:layout_marginBottom="8dp" />
 
-        <!-- Nhớ mật khẩu và Quên mật khẩu -->
+
+        <!-- Nhớ mật khẩu + Quên mật khẩu -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_gravity="center"
             android:layout_marginBottom="12dp">
 
             <CheckBox
                 android:id="@+id/cbRememberMe"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="Remember me" />
 
             <TextView
@@ -67,30 +86,34 @@
                 android:layout_height="wrap_content"
                 android:text="Forgot Password?"
                 android:textColor="#1976D2"
-                android:layout_gravity="end" />
+                android:gravity="end" />
         </LinearLayout>
 
-        <!-- Nút Đăng nhập -->
+        <!-- Nút đăng nhập -->
         <Button
             android:id="@+id/btnLogin"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:text="Login"
-            android:backgroundTint="#4CAF50"
             android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            app:backgroundTint="@null"
+            android:background="@drawable/bg_button_gradient"
             android:layout_marginBottom="12dp" />
 
-        <!-- Nút Đăng nhập Google -->
+        <!-- Nút đăng nhập Google -->
         <Button
             android:id="@+id/btnGoogleLogin"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="48dp"
             android:text="Login with Google"
-            android:backgroundTint="#DB4437"
+            app:backgroundTint="@null"
+            android:background="@drawable/bg_button_gradient_light"
             android:textColor="#FFFFFF"
+            android:textStyle="bold"
             android:layout_marginBottom="16dp" />
 
-        <!-- Chuyển sang Đăng ký -->
+        <!-- Chuyển sang đăng ký -->
         <TextView
             android:id="@+id/tvGoToRegister"
             android:layout_width="wrap_content"

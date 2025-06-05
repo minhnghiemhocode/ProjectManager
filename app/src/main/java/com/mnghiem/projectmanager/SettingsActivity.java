@@ -3,13 +3,16 @@ package com.mnghiem.projectmanager;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.View;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.view.View;
 
 import com.bumptech.glide.Glide;
 
 public class SettingsActivity extends BaseActivity {
+
+    private static final String TAG = "SETTINGS_DEBUG";
 
     private TextView btnTheme, btnStats, btnHelp, btnLogout;
     private View btnAccount;
@@ -22,7 +25,6 @@ public class SettingsActivity extends BaseActivity {
 
         setupTopAndBottomBar();
 
-        // Ánh xạ view
         btnAccount = findViewById(R.id.btnAccount);
         btnTheme = findViewById(R.id.btnTheme);
         btnStats = findViewById(R.id.btnStats);
@@ -30,11 +32,29 @@ public class SettingsActivity extends BaseActivity {
         btnLogout = findViewById(R.id.btnLogout);
         imgAvatar = findViewById(R.id.imgAvatar);
 
-        // 👉 Load ảnh từ Cloudinary URL (nếu có)
+        loadUserAvatar();
+
+        btnAccount.setOnClickListener(v -> startActivity(new Intent(this, AccountActivity.class)));
+        btnTheme.setOnClickListener(v -> startActivity(new Intent(this, ThemeActivity.class)));
+        btnStats.setOnClickListener(v -> startActivity(new Intent(this, StatisticsActivity.class)));
+        btnHelp.setOnClickListener(v -> startActivity(new Intent(this, HelpActivity.class)));
+
+        btnLogout.setOnClickListener(v -> {
+            SharedPreferences prefs = getSharedPreferences("USER_PREF", MODE_PRIVATE);
+            prefs.edit().clear().apply();
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        });
+    }
+
+    private void loadUserAvatar() {
         SharedPreferences prefs = getSharedPreferences("USER_PREF", MODE_PRIVATE);
         String avatarUrl = prefs.getString("avatarUrl", null);
+        Log.d(TAG, "🖼️ Avatar URL: " + avatarUrl);
 
-        if (avatarUrl != null && !avatarUrl.isEmpty()) {
+        if (avatarUrl != null && !avatarUrl.trim().isEmpty()) {
             Glide.with(this)
                     .load(avatarUrl)
                     .placeholder(R.drawable.ic_avatar_placeholder)
@@ -44,20 +64,5 @@ public class SettingsActivity extends BaseActivity {
         } else {
             imgAvatar.setImageResource(R.drawable.ic_avatar_placeholder);
         }
-
-        // Điều hướng
-        btnAccount.setOnClickListener(v -> startActivity(new Intent(this, AccountActivity.class)));
-        btnTheme.setOnClickListener(v -> startActivity(new Intent(this, ThemeActivity.class)));
-        btnStats.setOnClickListener(v -> startActivity(new Intent(this, StatisticsActivity.class)));
-        btnHelp.setOnClickListener(v -> startActivity(new Intent(this, HelpActivity.class)));
-
-        // Đăng xuất
-        btnLogout.setOnClickListener(v -> {
-            prefs.edit().clear().apply();
-            Intent intent = new Intent(this, LoginActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            finish();
-        });
     }
 }

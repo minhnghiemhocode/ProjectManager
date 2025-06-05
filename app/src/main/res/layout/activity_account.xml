@@ -1,19 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/accountRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    android:background="#FFFFFF">
+    android:background="#FFFFFF"
+    android:fitsSystemWindows="true">
 
-    <!-- Thanh trở về -->
+    <!-- Top Bar -->
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:padding="12dp">
+        android:padding="12dp"
+        android:background="#FFFFFF"
+        android:elevation="4dp">
 
         <ImageView
             android:id="@+id/btnBack"
@@ -28,10 +29,17 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="12dp"
-            android:text="Tài khoản"
+            android:text="Account setting"
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="#000000" />
+
+        <ImageView
+            android:id="@+id/btnEditSave"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_edit"
+            android:contentDescription="Chỉnh sửa" />
     </LinearLayout>
 
     <ScrollView
@@ -40,66 +48,16 @@
         android:layout_marginTop="56dp">
 
         <LinearLayout
-            android:id="@+id/accountContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Avatar -->
-            <FrameLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="16dp">
-
-                <ImageView
-                    android:id="@+id/imgAvatar"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:scaleType="centerCrop"
-                    android:background="@drawable/circle_background"
-                    android:src="@drawable/ic_avatar_placeholder"
-                    android:contentDescription="Ảnh đại diện" />
-
-                <ImageView
-                    android:id="@+id/iconEditAvatar"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="bottom|end"
-                    android:layout_margin="4dp"
-                    android:src="@drawable/ic_edit"
-                    android:background="@drawable/circle_background_small"
-                    android:padding="4dp"
-                    android:contentDescription="Chỉnh sửa ảnh đại diện" />
-            </FrameLayout>
-
-            <!-- Email -->
+            <!-- Avatar + ID -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Email"
-                android:textStyle="bold"
-                android:textColor="#888888"
-                android:layout_marginTop="4dp" />
-
-            <TextView
-                android:id="@+id/tvEmail"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="#000000"
-                android:paddingVertical="8dp" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#E0E0E0" />
-
-            <!-- Tên -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Tên người dùng"
+                android:text="Profile photo"
                 android:textStyle="bold"
                 android:textColor="#888888"
                 android:layout_marginTop="12dp" />
@@ -108,73 +66,173 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:paddingVertical="8dp">
+                android:padding="16dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_setting_item"
+                android:gravity="center_vertical">
+
+                <FrameLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+
+                    <ImageView
+                        android:id="@+id/imgAvatar"
+                        android:layout_width="64dp"
+                        android:layout_height="64dp"
+                        android:scaleType="centerCrop"
+                        android:background="@drawable/circle_background"
+                        android:src="@drawable/ic_avatar_placeholder"
+                        android:contentDescription="Ảnh đại diện" />
+
+                    <ImageView
+                        android:id="@+id/iconEditAvatar"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_gravity="bottom|end"
+                        android:layout_margin="4dp"
+                        android:src="@drawable/ic_edit"
+                        android:background="@drawable/circle_background_small"
+                        android:padding="4dp"
+                        android:visibility="gone"
+                        android:contentDescription="Sửa ảnh" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tvUserId"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ID: #123"
+                    android:textColor="#888888"
+                    android:textSize="14sp"
+                    android:layout_marginStart="16dp" />
+            </LinearLayout>
+
+            <!-- Email -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Email"
+                android:textStyle="bold"
+                android:textColor="#888888"
+                android:layout_marginTop="20dp" />
+
+            <TextView
+                android:id="@+id/tvEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_setting_item"
+                android:padding="16dp"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:layout_marginTop="8dp" />
+
+            <!-- Tên -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Name"
+                android:textStyle="bold"
+                android:textColor="#888888"
+                android:layout_marginTop="20dp" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_setting_item"
+                android:layout_marginTop="8dp"
+                android:padding="16dp">
 
                 <TextView
                     android:id="@+id/tvName"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:text=" "
                     android:textColor="#000000"
-                    android:text="Tên hiện tại" />
+                    android:textSize="16sp" />
 
                 <EditText
                     android:id="@+id/edtName"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:visibility="gone"
-                    android:background="@android:drawable/edit_text"
                     android:textColor="#000000"
-                    android:padding="8dp" />
+                    android:textSize="16sp"
+                    android:background="@null" />
 
                 <ImageView
                     android:id="@+id/iconEditName"
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentEnd="true"
                     android:src="@drawable/ic_edit"
-                    android:contentDescription="Chỉnh sửa tên" />
-            </LinearLayout>
+                    android:contentDescription="Sửa tên"
+                    android:visibility="gone" />
+            </RelativeLayout>
 
-            <View
+            <!-- Giới tính -->
+            <!-- Giới tính -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sex"
+                android:textStyle="bold"
+                android:textColor="#888888"
+                android:layout_marginTop="20dp" />
+
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#E0E0E0" />
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_setting_item"
+                android:padding="16dp">
+
+                <TextView
+                    android:id="@+id/tvGender"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text=""
+                    android:textColor="#000000"
+                    android:textSize="16sp" />
+
+                <Spinner
+                    android:id="@+id/spnGender"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    android:entries="@array/gender_array" />
+            </FrameLayout>
+
 
             <!-- Bảo mật -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Bảo mật"
+                android:text="Privacy"
                 android:textStyle="bold"
                 android:textColor="#888888"
-                android:layout_marginTop="12dp" />
+                android:layout_marginTop="20dp" />
 
             <TextView
                 android:id="@+id/btnChangePassword"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Cập nhật mật khẩu"
-                android:paddingVertical="12dp"
+                android:background="@drawable/bg_setting_item"
+                android:padding="16dp"
+                android:text="Change password"
+                android:textSize="16sp"
                 android:textColor="#000000"
-                android:clickable="true"
-                android:focusable="true" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:background="#E0E0E0" />
+                android:layout_marginTop="8dp" />
 
             <TextView
                 android:id="@+id/btnDeleteAccount"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Xoá tài khoản"
-                android:paddingVertical="12dp"
-                android:textColor="#000000"
-                android:clickable="true"
-                android:focusable="true" />
+                android:background="@drawable/bg_setting_item"
+                android:padding="16dp"
+                android:text="Delete account"
+                android:textSize="16sp"
+                android:textColor="#F44336"
+                android:layout_marginTop="8dp" />
         </LinearLayout>
     </ScrollView>
 </FrameLayout>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -11,7 +12,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Mời thành viên"
+        android:text="Invite member to project"
         android:textSize="18sp"
         android:textStyle="bold"
         android:textColor="#000000"
@@ -22,7 +23,7 @@
         android:id="@+id/edtEmail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Nhập email thành viên"
+        android:hint="Enter assignee's email"
         android:inputType="textEmailAddress"
         android:padding="12dp"
         android:background="@drawable/bg_input"
@@ -36,25 +37,35 @@
         android:orientation="horizontal"
         android:gravity="end">
 
-        <Button
+        <!-- Nút Huỷ (gradient light) -->
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCancel"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Huỷ"
+            android:text="Cancel"
             android:textAllCaps="false"
-            android:textColor="#666666"
-            android:background="@android:color/transparent"
-            android:layout_marginEnd="16dp" />
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            app:cornerRadius="12dp"
+            app:backgroundTint="@null"
+            android:background="@drawable/bg_button_gradient_light"
+            android:layout_marginEnd="12dp" />
 
-        <Button
+        <!-- Nút Mời (gradient đậm) -->
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnInvite"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Mời"
+            android:text="Invite"
             android:textAllCaps="false"
             android:textColor="#FFFFFF"
-            android:backgroundTint="#1976D2"
+            android:textSize="14sp"
             android:paddingHorizontal="16dp"
-            android:paddingVertical="6dp" />
+            android:paddingVertical="8dp"
+            app:cornerRadius="12dp"
+            app:backgroundTint="@null"
+            android:background="@drawable/bg_button_gradient" />
     </LinearLayout>
 </LinearLayout>

@@ -4,21 +4,24 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    android:background="#FFFFFF">
+    android:background="#FAFAFA">
 
-    <!-- Thanh top -->
+    <!-- Top Bar hiện đại -->
     <LinearLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="#1976D2"
+        android:layout_height="64dp"
+        android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="16dp">
+        android:background="@android:color/white"
+        android:elevation="4dp"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
 
         <ImageView
             android:id="@+id/btnCancel"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:src="@drawable/ic_back"
             android:contentDescription="Cancel" />
 
@@ -26,20 +29,21 @@
             android:id="@+id/tvTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="16dp"
             android:layout_weight="1"
-            android:text="New Boards"
-            android:textColor="#FFFFFF"
+            android:text="Create new folder"
+            android:textSize="20sp"
             android:textStyle="bold"
-            android:textSize="18sp" />
+            android:textColor="#212121" />
 
         <TextView
             android:id="@+id/btnSave"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="SAVE"
+            android:text="Create"
             android:textStyle="bold"
-            android:textColor="#FFFFFF" />
+            android:textSize="16sp"
+            android:textColor="#1976D2" />
     </LinearLayout>
 
     <!-- Nội dung chính -->
@@ -47,47 +51,52 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_below="@id/topBar"
-        android:padding="20dp">
+        android:padding="24dp">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:gravity="center_vertical">
 
-            <!-- Tên board -->
+            <!-- Tên Board -->
             <EditText
                 android:id="@+id/edtBoardName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Board name"
+                android:hint="Name"
                 android:background="@drawable/bg_input"
-                android:padding="12dp"
+                android:padding="14dp"
                 android:textColor="#000000"
-                android:textColorHint="#999999"
-                android:textSize="16sp" />
+                android:textColorHint="#9E9E9E"
+                android:textSize="16sp"
+                android:elevation="2dp" />
 
-            <!-- Tên nhóm (mặc định, không chỉnh sửa) -->
+            <!-- Tên workspace (không chỉnh sửa) -->
             <TextView
                 android:id="@+id/tvWorkspaceName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Workspace: UI Redesign"
+                android:layout_marginTop="20dp"
+                android:text="Front-End: UI Design"
                 android:textSize="14sp"
-                android:textColor="#666666" />
+                android:textColor="#757575" />
 
             <!-- Mô tả -->
             <EditText
                 android:id="@+id/edtBoardDesc"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Description (optional)"
+                android:layout_marginTop="20dp"
+                android:hint="Description"
                 android:background="@drawable/bg_input"
-                android:padding="12dp"
+                android:padding="14dp"
                 android:textColor="#000000"
-                android:textColorHint="#999999"
+                android:textColorHint="#9E9E9E"
                 android:textSize="16sp"
-                android:layout_marginTop="16dp" />
+                android:minLines="3"
+                android:gravity="top"
+                android:elevation="2dp" />
         </LinearLayout>
     </ScrollView>
 </RelativeLayout>
